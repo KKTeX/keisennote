@@ -1,9 +1,14 @@
-\documentclass[a4paper,12pt]{article}
-
-\usepackage{booktabs,tabularray}
-
+\documentclass[luatex,fontsize=8pt,paper=b5,twoside]{jlreq}%
+\usepackage{luwa-ul}
 \usepackage{hyperref}
+\usepackage{booktabs,caption}
+\usepackage[most]{tcolorbox}
+\usepackage{fp}
+\usepackage{lltjext}
+\usepackage{luatexja-ruby}
 \usepackage{keisennote}
+\usepackage{amsmath,amssymb}
+
 \usepackage{listings}
 \lstset{
     basicstyle=\ttfamily\small,
@@ -15,6 +20,26 @@
     columns=flexible           
 }
 
+% You can omit these font settings.
+\RequirePackage[no-math]{fontspec}
+\RequirePackage[no-math,match,scale=1]{luatexja-fontspec}
+\RequirePackage[hiragino-pro,deluxe,expert]{luatexja-preset}
+\setmainfont{HiraMinPro-W3}[BoldFont=HiraMinPro-W6]\setmainjfont{HiraMinPro-W3}[BoldFont=HiraMinPro-W6]
+\renewfontfamily{\sffamily}{HiraKakuPro-W3}[BoldFont=HiraKakuPro-W6]
+\renewfontfamily{\mcfamily}{HiraMinPro-W3}[BoldFont=HiraMinPro-W6]
+\renewfontfamily{\gtfamily}{HiraKakuPro-W3}[BoldFont=HiraKakuPro-W6]
+\providefontfamily{\mgfamily}{HiraMaruPro-W4}
+\newfontfamily{\sfhira}{HiraKakuPro-W3}[BoldFont=HiraKakuPro-W6]\newjfontfamily{\sfhiraj}{HiraKakuPro-W3}[BoldFont=HiraKakuPro-W6]
+\newfontfamily{\mchira}{HiraMinPro-W3}[BoldFont=HiraMinPro-W6]\newjfontfamily{\mchiraj}{HiraMinPro-W3}[BoldFont=HiraMinPro-W6]
+\newfontfamily{\gthira}{HiraKakuPro-W3}[BoldFont=HiraKakuPro-W6,FontFace={eb}{\shapedefault}{HiraKakuStd-W8}]\newjfontfamily{\gthiraj}{HiraKakuPro-W3}[BoldFont=HiraKakuPro-W6,FontFace={eb}{\shapedefault}{HiraKakuStd-W8}]
+\newfontfamily{\mghira}{HiraMaruPro-W4}\newjfontfamily{\mghiraj}{HiraMaruPro-W4}
+\renewcommand{\sffamily}{\sfhira\sfhiraj}
+\renewcommand{\mcfamily}{\mchira\mchiraj}
+\renewcommand{\gtfamily}{\gthira\gthiraj}
+\renewcommand{\mgfamily}{\mghira\mghiraj}
+%%%
+
+
 \usepackage{hyperref} 
 \hypersetup{
   luatex, pdfencoding=auto, 
@@ -25,11 +50,48 @@
   pdfborder={0 0 0}, 
 }
 
+\colorlet{grayLight}{white!80!black} 
+
+\NewTCBListing{SourceCode}{ O{Input} m !o !O{DeepSkyBlue3} }{%
+  enhanced, colback=black!70, colframe=Snow4,
+  toptitle=-1mm, bottomtitle=-1mm,
+  righttitle=-1mm, lefttitle=-1mm,
+  arc=.5mm, 
+  title={\tcbox[on line, arc=.5mm, boxsep=0pt, boxrule=0pt, top=1mm, bottom=0.8mm, left=2mm, right=2.2mm, colback=gray!80, coltext=white]{\raisebox{-0.1ex}{\vphantom{羅}\vphantom{j}#1}}},fonttitle=\gtfamily\footnotesize,boxrule=0.8pt,
+  breakable,before upper={\color{white}},top=-0.5mm,bottom=-0.5mm,
+  after title=\IfNoValueTF{#3}{}{{\hfill\tcbox[on line, arc=.5mm, boxsep=0pt, boxrule=0pt, top=1mm, bottom=0.8mm, left=2mm, right=2.2mm, colback=white!80!black, coltext=#4]{\raisebox{-0.1ex}{\vphantom{羅}\vphantom{j}#3}}}},
+  listing only,
+  listing options={
+    language={#2},
+    basicstyle=\ttfamily,
+    keywordstyle=\ttfamily\color{white},
+    stringstyle=\itshape\color{white},
+    commentstyle=\small\gtfamily\color{DeepSkyBlue2},
+    showspaces=false,showtabs=false,
+    breaklines=true,breakindent=0pt,
+    showstringspaces=false,
+    columns=fullflexible,
+    tabsize=2,
+    numbers=left,numbersep=1.5pt,
+    numberstyle=\scriptsize\gtfamily\color{gray},
+  }
+}
+
+\NewTColorBox{OutPut}{ m !o !O{DeepSkyBlue3} }{%
+  enhanced, colframe=Snow4,
+  toptitle=-1mm, bottomtitle=-1mm,
+  righttitle=-1mm, lefttitle=-1mm,
+  arc=.5mm, colback=white, 
+  title={\tcbox[on line, arc=.5mm, boxsep=0pt, boxrule=0pt, top=1mm, bottom=0.8mm, left=2mm, right=2.2mm, colback=gray!40, coltext=DeepSkyBlue3]{\raisebox{-0.1ex}{\vphantom{羅}\vphantom{j}#1}}},fonttitle=\gtfamily\footnotesize,boxrule=0.8pt,
+  breakable,top=-0.5mm,bottom=-0.5mm,
+  after title=\IfNoValueTF{#2}{}{{\hfill\tcbox[on line, arc=.5mm, boxsep=0pt, boxrule=0pt, top=1mm, bottom=0.8mm, left=2mm, right=2.2mm, colback=white!80!black, coltext=#3]{\raisebox{-0.1ex}{\vphantom{羅}\vphantom{j}#2}}}}, bottom=2mm, top=2mm, 
+}
 
 
 \title{\texttt{keisennote} Package Documentation}
 \author{Kosei Kawaguchi a.k.a. KKTeX}
-\date{Version 1.0.4a (2025/10/05)}
+\date{Version 1.0.4b (2025/12/27)}
+
 \begin{document}
 \begin{titlepage}
   \maketitle
@@ -40,8 +102,7 @@
 
 \section{Acknowledgements / Credit}
 
-This package is based on the code from 
-\href{https://qiita.com/VoD/items/6849e63b978050218d2f}{VoD's Qiita article}, 
+This package is based on the code from \href{https://qiita.com/VoD/items/6849e63b978050218d2f}{VoD's Qiita article}, 
 with some improvements. The original author has kindly granted permission 
 to release this as a LaTeX package.
 
@@ -51,18 +112,18 @@ Place \texttt{keisennote.sty} in a directory where LaTeX can find it, e.g., your
 
 Dependencies:
 \begin{itemize}
-    \item \texttt{xcolor} 
-    \item \texttt{tikz}
-    \item \texttt{zref}, \texttt{zref-savepos}, \texttt{fp}
-    \item \texttt{kvoptions}
+  \item \texttt{xcolor} 
+  \item \texttt{tikz}
+  \item \texttt{zref}, \texttt{zref-savepos}, \texttt{fp}
+  \item \texttt{kvoptions}
 \end{itemize}
 
 
 Load the package:
 
-\begin{verbatim}
-\usepackage{keisennote}
-\end{verbatim}
+\begin{SourceCode}{TeX}
+  \usepackage[options]{keisennote}
+\end{SourceCode}
 
 \section{Package options}
 
@@ -100,71 +161,73 @@ The available options and their default values are listed below.
 \paragraph{Internal behaviour}
 \begin{itemize}
   \item Each option is first stored as a string macro (e.g.\ \verb|\kn@linewidth|), as imposed by \verb|\DeclareStringOption|.
-        The package then assigns it to a \verb|\dimen| register, for example:
-\begin{lstlisting}[language=TeX]
-\noteLineWidth=\kn@linewidth\relax
-\dotsRadius=\kn@radius\relax
-\noteLineDistance=\kn@distance\relax
-\VoD@mag=\kn@triangle\relax
-\end{lstlisting}
-        This conversion ensures that user-supplied expressions such as
-        \texttt{1truept} or \texttt{0.5mm} are properly interpreted as lengths.
+  The package then assigns it to a \verb|\dimen| register, for example:
+
+  \begin{SourceCode}{TeX}
+    \noteLineWidth=\kn@linewidth\relax
+    \dotsRadius=\kn@radius\relax
+    \noteLineDistance=\kn@distance\relax
+    \VoD@mag=\kn@triangle\relax
+  \end{SourceCode}
+
+  This conversion ensures that user-supplied expressions such as \texttt{1truept} or \texttt{0.5mm} are properly interpreted as lengths.
+
   \item If the package does not perform this assignment automatically,
-        users may do so manually; however, in normal usage this is handled internally.
+  users may do so manually; however, in normal usage this is handled internally.
 \end{itemize}
 
 \paragraph{Examples}
 \begin{itemize}
   \item Specify options at package load:
-\begin{lstlisting}[language=TeX]
-\usepackage[linewidth=1truept, radius=.6truept, distance=8truemm]{keisennote}
-\end{lstlisting}
+  \begin{SourceCode}{TeX}
+    \usepackage[linewidth=1truept, radius=.6truept, distance=8truemm]{keisennote}
+  \end{SourceCode}
   \item Modify options afterwards using \verb|\setkeys|:
-\begin{lstlisting}[language=TeX]
-\setkeys{kn}{linewidth=0.8pt, distance=5mm}
-\noteLineWidth=\kn@linewidth\relax  % reassign to internal registers if needed
-\end{lstlisting}
+  \begin{SourceCode}{TeX}
+    \setkeys{kn}{linewidth=0.8pt, distance=5mm}
+    \noteLineWidth=\kn@linewidth\relax  % reassign to internal registers if needed
+  \end{SourceCode}
 \end{itemize}
 
 \paragraph{Remarks}
 \begin{itemize}
   \item Absolute units such as \texttt{truept} / \texttt{truemm} are used as defaults
-        to avoid driver-dependent scaling.
+  to avoid driver-dependent scaling.
   \item No range checks are performed on the option values.
-        Excessively small or negative values may lead to undesirable results.
-        If required, minimum-value guards can be implemented via \verb|\ifdim|.
+  Excessively small or negative values may lead to undesirable results.
+  If required, minimum-value guards can be implemented via \verb|\ifdim|.
 \end{itemize}
 
 \section{Commands}
 
 \subsection{\texttt{\textbackslash notefill}}
-\begin{verbatim}
-\notefill[<color>]
-\end{verbatim}
+\begin{SourceCode}{TeX}
+  \notefill[<color>]
+\end{SourceCode}
 
 Fills the current vertical space with ruled notebook lines and dots.
 
 \textbf{Example:}
-\begin{verbatim}
-\notefill[green]
-\end{verbatim}
+\begin{SourceCode}{TeX}
+  \notefill[green]
+\end{SourceCode}
 
 \subsection{\texttt{\textbackslash note}}
-\begin{verbatim}
-\note{<lines>}[<color>]
-\end{verbatim}
+\begin{SourceCode}{TeX}
+  \note{<lines>}[<color>]
+\end{SourceCode}
 
 Typesets a short ruled block with a specified number of lines.
 
 \begin{itemize}
-    \item \texttt{<lines>} (mandatory, integer $\ge$ 2): number of ruled lines.
-    \item \texttt{<color>} (optional, default: white!70!black): color of lines and dots.
+  \item \texttt{<lines>} (mandatory, integer $\ge$ 2): number of ruled lines.
+  \item \texttt{<color>} (optional, default: white!70!black): color of lines and dots.
 \end{itemize}
 
 \textbf{Example:}
-\begin{verbatim}
-\note{5}[NavyBlue]
-\end{verbatim}
+\begin{SourceCode}{TeX}
+  \note{5}[NavyBlue]
+\end{SourceCode}
 
 This produces the following output.\bigskip
 
@@ -173,9 +236,9 @@ This produces the following output.\bigskip
 \bigskip Inserting \verb|\bigskip| before (and after) using the \verb|\note| command can sometimes improve the appearance.
 
 \subsection{\texttt{\textbackslash masumefill}}
-\begin{verbatim}
-\masume[<color>]
-\end{verbatim}
+\begin{SourceCode}{TeX}
+  \masume[<color>]
+\end{SourceCode}
 
 Fills the current vertical space with grids and dots.
 
@@ -184,14 +247,14 @@ Fills the current vertical space with grids and dots.
 \end{itemize}
 
 \textbf{Example:}
-\begin{verbatim}
-\notefill[Gray]
-\end{verbatim}
+\begin{SourceCode}{TeX}
+  \notefill[Gray]
+\end{SourceCode}
 
 \subsection{\texttt{\textbackslash masume}}
-\begin{verbatim}
-\masume{<lines>}[<color>]
-\end{verbatim}
+\begin{SourceCode}{TeX}
+  \masume{<lines>}[<color>]
+\end{SourceCode}
 
 Typesets a short grid block with a specified number of lines.
 
@@ -201,9 +264,9 @@ Typesets a short grid block with a specified number of lines.
 \end{itemize}
 
 \textbf{Example:}
-\begin{verbatim}
-\masume{5}[NavyBlue]
-\end{verbatim}
+\begin{SourceCode}{TeX}
+  \masume{5}[NavyBlue]
+\end{SourceCode}
 
 This produces the following output.\bigskip
 
@@ -227,16 +290,24 @@ If no argument is given, the parameter is reset to its default value.
 \section{Examples}
 
 \subsection{Short Note Block}
-\begin{verbatim}
+\begin{SourceCode}{TeX}
+  \note{4}
+\end{SourceCode}
+
+\textbf{Output:}
 \note{4}
-\end{verbatim}
-\note{4}
+
 \newpage
+
 \subsection{Full Page Fill}
-\begin{verbatim}
+\begin{SourceCode}{TeX}
+  \notefill
+\end{SourceCode}
+
+\textbf{Output:}
 \notefill
-\end{verbatim}
-\notefill\newpage
+
+\newpage
 
 \section{License}
 
@@ -245,15 +316,16 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
 \section{Version History}
 
 \begin{itemize}
-    \item \textbf{v1.0.0 (2025/09/13)} --- Initial public release.
-    \item \textbf{v1.0.3 (2025/09/13)} --- KKTeX added \texttt{\textbackslash masume} and \texttt{\textbackslash masumefill}.
-    \item \textbf{v1.0.4 (2025/10/4)} --- KKTeX fixed the problem in \verb|\masumefill| and added some package options and setting commands.
-    \item \textbf{v1.0.4a (2025/10/5)} --- Added some descriptions about new package options.
+  \item \textbf{v1.0.0 (2025/09/13)} --- Initial public release.
+  \item \textbf{v1.0.3 (2025/09/13)} --- KKTeX added \texttt{\textbackslash masume} and \texttt{\textbackslash masumefill}.
+  \item \textbf{v1.0.4 (2025/10/4)} --- KKTeX fixed the problem in \verb|\masumefill| and added some package options and setting commands.
+  \item \textbf{v1.0.4a (2025/10/5)} --- Added some descriptions about new package options.
+  \item \textbf{v1.0.4a (2025/10/5)} --- Inproved package documentation.
 \end{itemize}
 
 \section{Source Code}
   \begin{lstlisting}
-    \ProvidesPackage{keisennote}[2025/10/05, v1.0.4a]
+    \ProvidesPackage{keisennote}[2025/12/27, v1.0.4b]
 
     \RequirePackage[dvipsnames, svgnames, x11names]{xcolor}
     \RequirePackage{zref, zref-savepos, fp}
@@ -313,13 +385,13 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
     \newdimen\VDNT@Xinterval
     \newdimen\VDNT@Yinterval
     \newdimen\VDNT@notegoal
+    \def\VDNT@xscaler{.996}
 
     %%% \notefillで用いる座標管理用カウンタの準備
     \def\VDNT@pkgname{vodnote}
     \global\newcount\VDNT@uniqe
 
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%% \notefill の定義
     \NewDocumentCommand{\notefill}{ O{white!70!black} }{\par\bgroup
       \parindent\z@
@@ -341,7 +413,7 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
       \relax
       %%ノート罫線描画
       \noindent\smash{%
-        \begin{tikzpicture}[xscale=0.996]
+        \begin{tikzpicture}[xscale=\VDNT@xscaler]
           \VDNT@currentYPos\z@
           \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VoD@mag*4pt) -- ++(\VoD@mag*3pt,-\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle;
           \@whiledim\VDNT@currentYPos<\VDNT@notegoal\do{
@@ -373,7 +445,7 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
       \VDNT@Yinterval\VDNT@Xinterval
       %%ノート罫線描画
       \noindent
-        \begin{tikzpicture}[xscale=0.996]
+        \begin{tikzpicture}[xscale=\VDNT@xscaler]
           \VDNT@currentYPos\z@
           \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VDNT@Yinterval+\VoD@mag*4pt) -- ++(\VoD@mag*3pt,-\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle; %上の三角形
           \foreach \i in{1,2,...,#1}{ 
@@ -392,7 +464,6 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
     }
 
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \NewDocumentCommand{\masumefill}{ O{white!70!black} }{\par\bgroup
       \parindent\z@
       %%罫線間隔の算出
@@ -413,7 +484,7 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
       \relax
       %%ノート罫線描画
       \noindent\smash{%
-        \begin{tikzpicture}[xscale=0.996]
+        \begin{tikzpicture}[xscale=\VDNT@xscaler]
           \VDNT@currentYPos\z@
           \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VoD@mag*4pt) -- ++(\VoD@mag*3pt,-\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle;
           \@whiledim\VDNT@currentYPos<\VDNT@notegoal\do{
@@ -446,7 +517,7 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
       \VDNT@Yinterval\VDNT@Xinterval
       %%ノート罫線描画
       \noindent
-        \begin{tikzpicture}[xscale=0.996]
+        \begin{tikzpicture}[xscale=\VDNT@xscaler]
           \VDNT@currentYPos\z@
           \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VDNT@Yinterval+\VoD@mag*4pt) -- ++(\VoD@mag*3pt,-\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle; %上の三角形
           \foreach \i in{1,2,...,#1}{ 

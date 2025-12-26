@@ -1,4 +1,4 @@
-\ProvidesPackage{keisennote}[2025/10/05, v1.0.4a]
+\ProvidesPackage{keisennote}[2025/12/27, v1.0.4b]
 
 \RequirePackage[dvipsnames, svgnames, x11names]{xcolor}
 \RequirePackage{zref, zref-savepos, fp}
@@ -58,13 +58,13 @@
 \newdimen\VDNT@Xinterval
 \newdimen\VDNT@Yinterval
 \newdimen\VDNT@notegoal
+\def\VDNT@xscaler{.996}
 
 %%% \notefillで用いる座標管理用カウンタの準備
 \def\VDNT@pkgname{vodnote}
 \global\newcount\VDNT@uniqe
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% \notefill の定義
 \NewDocumentCommand{\notefill}{ O{white!70!black} }{\par\bgroup
   \parindent\z@
@@ -86,7 +86,7 @@
   \relax
   %%ノート罫線描画
   \noindent\smash{%
-    \begin{tikzpicture}[xscale=0.996]
+    \begin{tikzpicture}[xscale=\VDNT@xscaler]
       \VDNT@currentYPos\z@
       \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VoD@mag*4pt) -- ++(\VoD@mag*3pt,-\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle;
       \@whiledim\VDNT@currentYPos<\VDNT@notegoal\do{
@@ -118,7 +118,7 @@
   \VDNT@Yinterval\VDNT@Xinterval
   %%ノート罫線描画
   \noindent
-    \begin{tikzpicture}[xscale=0.996]
+    \begin{tikzpicture}[xscale=\VDNT@xscaler]
       \VDNT@currentYPos\z@
       \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VDNT@Yinterval+\VoD@mag*4pt) -- ++(\VoD@mag*3pt,-\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle; %上の三角形
       \foreach \i in{1,2,...,#1}{ 
@@ -137,7 +137,6 @@
 }
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \NewDocumentCommand{\masumefill}{ O{white!70!black} }{\par\bgroup
   \parindent\z@
   %%罫線間隔の算出
@@ -158,7 +157,7 @@
   \relax
   %%ノート罫線描画
   \noindent\smash{%
-    \begin{tikzpicture}[xscale=0.996]
+    \begin{tikzpicture}[xscale=\VDNT@xscaler]
       \VDNT@currentYPos\z@
       \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VoD@mag*4pt) -- ++(\VoD@mag*3pt,-\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle;
       \@whiledim\VDNT@currentYPos<\VDNT@notegoal\do{
@@ -191,7 +190,7 @@
   \VDNT@Yinterval\VDNT@Xinterval
   %%ノート罫線描画
   \noindent
-    \begin{tikzpicture}[xscale=0.996]
+    \begin{tikzpicture}[xscale=\VDNT@xscaler]
       \VDNT@currentYPos\z@
       \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VDNT@Yinterval+\VoD@mag*4pt) -- ++(\VoD@mag*3pt,-\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle; %上の三角形
       \foreach \i in{1,2,...,#1}{ 
