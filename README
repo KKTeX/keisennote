@@ -1,25 +1,78 @@
-keisennote — TikZ notebook ruled lines for LaTeX
-================================================
+# keisennote
 
-Version: 1.0.4b
-Date: 2025-12-27
-Author: Kosei Kawaguchi a.k.a. KKTeX
-License: LPPL 1.3c
-Link: https://github.com/KKTeX/keisennote
-Support: p.c.aces1056@gmail.com
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Description:
-------------
-Typeset Japanese-style ruled notebook lines in LaTeX. Supports full-page fills
-(\notefill) and short blocks (\note). Compatible with multicols.
+**TikZ notebook ruled lines for LaTeX / 日本式ノート罫線作成パッケージ**
 
-Dependencies:
--------------
-xcolor, tikz etc.
+---
 
-Credit:
--------
-Based on VoD's Qiita article (https://qiita.com/VoD/items/6849e63b978050218d2f) 
-with permission.
+## Overview / 概要
 
-See keisennote-doc.tex for usage examples.
+`keisennote` is a LaTeX package for typesetting Japanese-style ruled notebook lines. It supports both full-page fills and short blocks of lines, making it ideal for creating worksheets or study materials.
+`keisennote` は、日本式のノート罫線を組版するためのパッケージです。ページ全体を罫線で埋める機能や、短いブロックとしての配置に対応しており、学習プリントや教材の作成に最適です。
+
+- **Version**: 1.0.4b
+- **Date**: 2025-12-27
+- **Author**: Kosei Kawaguchi (a.k.a. KKTeX)
+- **License**: MIT（LPPL 1.3c から変更）
+- **Repository**: [https://github.com/KKTeX/keisennote](https://github.com/KKTeX/keisennote)
+- **Support**: p.c.aces1056@gmail.com
+
+---
+
+## Key Features / 特徴
+
+- **Versatile Layouts / 多彩なレイアウト**
+  - Use `\notefill` to fill an entire page with ruled lines.
+  - Use `\note` to insert a specific number of lines in a block.
+  - `\notefill` でページ全体を、`\note` で特定の行数分の罫線ブロックを簡単に作成できます。
+
+- **Multicolumn Support / 段組み対応**
+  - Fully compatible with the `multicols` package.
+  - `multicols` パッケージとの併用が可能で、段組みレイアウト内でも使用できます。
+
+- **Customizable Appearance / 自由なカスタマイズ**
+  - Leveraging TikZ for flexible styling of lines.
+  - TikZを活用しているため、罫線のスタイルを柔軟に調整可能です。
+
+---
+
+## Credit / クレジット
+
+This package is based on [VoD's Qiita article](https://qiita.com/VoD/items/6849e63b978050218d2f) and has been released with the author's permission.
+本パッケージは、VoD氏によるQiitaの記事をベースにしており、著者の許可を得て公開されています。
+
+---
+
+## Usage / 使用方法
+
+For detailed usage and examples, please refer to the documentation file: `keisennote-doc.tex`.
+具体的な使用方法や例については、ドキュメントファイル `keisennote-doc.tex` を参照してください。
+
+---
+
+## License / ライセンス
+
+This package is licensed under the **MIT License**.
+本パッケージは **MITライセンス** のもとで公開されています。
+
+```text
+Copyright (c) 2025 Kosei Kawaguchi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
