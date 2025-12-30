@@ -90,6 +90,7 @@
   show number/.is if = VDNT@shownumber,
   default/.style = {color=white!70!black, step=5}
 }
+
 \NewDocumentCommand{\notefill}{ O{} }{%
   \par\bgroup%
   \pgfkeys{/VDNT, default, #1}%
@@ -251,21 +252,34 @@
 
 
 % \note の定義（２以上の整数を引数に）
-\NewDocumentCommand{\note}{ m O{white!70!black} }{%
+\NewDocumentCommand{\note}{ m O{} }{%
   \par\bgroup%
+  \pgfkeys{/VDNT, default, #2}%
   \@tempcnta\linewidth%
   \@tempcntb\noteLineDistance@kn%
   \cal@kn@internal%
   \noindent%
   \begin{tikzpicture}[xscale=\VDNT@xscaler]
     \VDNT@currentYPos\z@
+    %%%
+    \kn@linecount@internal=#1\relax 
+    %%%
     \coordinate (TopMarker) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@Yinterval+\noteTriangle@mag@kn*4pt);
-    \fill[#2] (TopMarker) -- ++(\noteTriangle@mag@kn*3pt, -\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
+    \fill[\VDNT@color] (TopMarker) -- ++(\noteTriangle@mag@kn*3pt, -\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
     \foreach \i in {1, 2, ..., #1} {%
       \xdef\tempY{\the\dimexpr\VDNT@Yinterval*\i\relax}
       \coordinate (LineL) at (0, \tempY);
       \coordinate (LineR) at (\linewidth, \tempY);
-      \draw[#2, line width=\noteLineWidth@kn] (LineL) -- (LineR);
+      % --- 行番号の描画 ---
+      \ifVDNT@shownumber
+        \pgfmathtruncatemacro{\VDNT@currentnum}{#1 - \i + 1 }
+        \pgfmathtruncatemacro{\rem@notefill}{mod(\VDNT@currentnum,\VDNT@step)} % 上から順なら \i で判定するのが楽
+        \ifnum\rem@notefill=0
+          \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-5pt]LineL) {\VDNT@currentnum};
+        \fi
+      \fi
+      % --------------------
+      \draw[\VDNT@color, line width=\noteLineWidth@kn] (LineL) -- (LineR);
       \foreach \k in {0, 1, ..., \VDNT@dotsNum} {%
         \pgfmathtruncatemacro{\VDNT@halfNum}{\VDNT@dotsNum/2}%
         \def\skipdot{0}%
@@ -273,14 +287,14 @@
         \ifnum\i=#1 \ifnum\k=\VDNT@halfNum \def\skipdot{1}\fi\fi
         \ifnum\skipdot=0
           \coordinate (DotPos) at (\the\dimexpr\VDNT@Xinterval*\k\relax, \tempY);
-          \fill[#2] (DotPos) circle [radius=\noteDotsRadius@kn];
+          \fill[\VDNT@color] (DotPos) circle [radius=\noteDotsRadius@kn];
         \fi
       }%
-      % 最後に使ったY座標を記録しておく（下の三角用）
+      % 最後に使ったY座標を記録
       \ifnum\i=#1 \global\VDNT@currentYPos=\tempY\relax \fi
     }%
     \coordinate (BottomMarker) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos-\noteTriangle@mag@kn*4pt);
-    \fill[#2] (BottomMarker) -- ++(\noteTriangle@mag@kn*3pt, \noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
+    \fill[\VDNT@color] (BottomMarker) -- ++(\noteTriangle@mag@kn*3pt, \noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
   \end{tikzpicture}%
   \egroup%
   \par%
