@@ -82,8 +82,17 @@
     -\zposy{\VDNT@pkgname.\the\VDNT@uniqe.BottomPos}sp
   \relax%
 }
-\NewDocumentCommand{\notefill}{ O{white!70!black} }{%
+\newif\ifVDNT@shownumber
+\pgfkeys{
+  /VDNT/.is family, /VDNT,
+  color/.estore in = \VDNT@color,
+  step/.estore in = \VDNT@step,
+  show number/.is if = VDNT@shownumber,
+  default/.style = {color=white!70!black, step=5}
+}
+\NewDocumentCommand{\notefill}{ O{} }{%
   \par\bgroup%
+  \pgfkeys{/VDNT, default, #1}%
   \parindent\z@%
   \@tempcnta\linewidth% 総横幅
   \@tempcntb\noteLineDistance@kn% 単位横幅
@@ -98,24 +107,27 @@
     \begin{tikzpicture}[xscale=\VDNT@xscaler]
       \VDNT@currentYPos\z@
       %%%
-        \kn@linecount@internal=\VDNT@totalLines\relax % 初期値を総行数に設定
-        \advance\kn@linecount@internal by \@ne\relax %
+      \kn@linecount@internal=\VDNT@totalLines\relax % 初期値を総行数に設定
+      \advance\kn@linecount@internal by \@ne\relax %
       %%%
       % 上端の三角
       \coordinate (TopMarkerTip) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos+\noteTriangle@mag@kn*4pt);
-      \fill[#1] (TopMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,-\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
+      \fill[\VDNT@color] (TopMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,-\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
       % 罫線とドットのループ描画 
       \@whiledim\VDNT@currentYPos<\VDNT@notegoal\do{%
         % 横線の左端(L)と右端(R)
         \coordinate (L) at (0, \VDNT@currentYPos);
         \coordinate (R) at (\linewidth, \VDNT@currentYPos);
         % --- 行番号の描画 ---
-          % 左端(L)のさらに左側に配置
-          \node[anchor=east, font=\scriptsize, text=#1, overlay]
-          at ([xshift=-5pt]L) {\the\kn@linecount@internal};
+        \ifVDNT@shownumber
+          \pgfmathtruncatemacro{\rem@notefill}{mod(\kn@linecount@internal,\VDNT@step)}
+          \ifnum\rem@notefill=0
+            \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-5pt]L) {\the\kn@linecount@internal};
+          \fi
+        \fi
         % --------------------
         % 罫線を引く
-        \draw[#1, line width=\noteLineWidth@kn] (L) -- (R);
+        \draw[\VDNT@color, line width=\noteLineWidth@kn] (L) -- (R);
         % ループ内のドット描画部分 
         \foreach \k in{0,1,...,\VDNT@dotsNum}{%
           \pgfmathtruncatemacro{\VDNT@halfNum}{\VDNT@dotsNum/2}%
@@ -132,19 +144,19 @@
           \fi
           \ifnum\do@draw@dot=1\relax
             \coordinate (Dot) at (\the\dimexpr\VDNT@Xinterval*\k\relax, \VDNT@currentYPos);
-            \fill[#1] (Dot) circle [radius=\noteDotsRadius@kn];
+            \fill[\VDNT@color] (Dot) circle [radius=\noteDotsRadius@kn];
           \fi
         }
         % 次の行へ移動
         \advance\VDNT@currentYPos\VDNT@Yinterval\relax
         %%%カウントダウン
-          \advance\kn@linecount@internal by -\@ne\relax 
+        \advance\kn@linecount@internal by -\@ne\relax 
         %%%
       }
       % 下端の三角
       % 座標を定義：(中心X, 最後の行Y - 4pt)
       \coordinate (BottomMarkerTip) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos-\VDNT@Yinterval-\noteTriangle@mag@kn*4pt);
-      \fill[#1] (BottomMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
+      \fill[\VDNT@color] (BottomMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
     \end{tikzpicture}%
   }%
   \egroup%
@@ -152,28 +164,44 @@
   \par%
 }
 
-\NewDocumentCommand{\masumefill}{ s O{white!70!black} }{%
+\NewDocumentCommand{\masumefill}{ s O{} }{%
   \par\bgroup%
+  \pgfkeys{/VDNT, default, #2}%
   \parindent\z@%
   \@tempcnta\linewidth% 総横幅
   \@tempcntb\noteLineDistance@kn% 単位横幅
   \cal@kn@internal%
   \savepos@kn@internal@notefill%
   \cal@kn@internal@notefill%
+  %%%行数算出
+  \pgfmathtruncatemacro{\VDNT@totalLines}{floor(\VDNT@notegoal / \VDNT@Yinterval)}%
+  %%%
   % ノート罫線描画本体
   \noindent\smash{%
     \begin{tikzpicture}[xscale=\VDNT@xscaler]
       \VDNT@currentYPos\z@
+      %%%
+      \kn@linecount@internal=\VDNT@totalLines\relax % 初期値を総行数に設定
+      \advance\kn@linecount@internal by \@ne\relax %
+      %%%
       % 上端の三角
       \coordinate (TopMarkerTip) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos+\noteTriangle@mag@kn*4pt);
-      \fill[#2] (TopMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,-\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
+      \fill[\VDNT@color] (TopMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,-\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
       % 罫線とドットのループ描画 
       \@whiledim\VDNT@currentYPos<\VDNT@notegoal\do{%
         % 横線の左端(L)と右端(R)
         \coordinate (L) at (0, \VDNT@currentYPos);
         \coordinate (R) at (\linewidth, \VDNT@currentYPos);
+        % --- 行番号の描画 ---
+        \ifVDNT@shownumber
+          \pgfmathtruncatemacro{\rem@notefill}{mod(\kn@linecount@internal,\VDNT@step)}
+          \ifnum\rem@notefill=0
+            \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-5pt]L) {\the\kn@linecount@internal};
+          \fi
+        \fi
+        % --------------------
         % 罫線を引く
-        \draw[#2, line width=\noteLineWidth@kn] (L) -- (R);
+        \draw[\VDNT@color, line width=\noteLineWidth@kn] (L) -- (R);
         % ループ内のドット描画部分 
         \foreach \k in{0,1,...,\VDNT@dotsNum}{%
           \pgfmathtruncatemacro{\VDNT@halfNum}{\VDNT@dotsNum/2}%
@@ -192,25 +220,28 @@
           \coordinate (VBottom) at (\the\dimexpr\VDNT@Xinterval*\k\relax, \VDNT@currentYPos);
           \VDNT@currentXPos=\dimexpr\VDNT@currentYPos+\VDNT@Yinterval\relax
           \ifdim\VDNT@currentXPos<\VDNT@notegoal\relax
-            \draw[#2, line width=\noteLineWidth@kn] (VBottom) -- ++(0, \VDNT@Yinterval);
+            \draw[\VDNT@color, line width=\noteLineWidth@kn] (VBottom) -- ++(0, \VDNT@Yinterval);
           \fi
           % ------------------
           \ifnum\do@draw@dot=1\relax
             \coordinate (Dot) at (\the\dimexpr\VDNT@Xinterval*\k\relax, \VDNT@currentYPos);
-            \fill[#2] (Dot) circle [radius=\noteDotsRadius@kn];
+            \fill[\VDNT@color] (Dot) circle [radius=\noteDotsRadius@kn];
           \fi
         }
         % 次の行へ移動
         \advance\VDNT@currentYPos\VDNT@Yinterval\relax
+        %%%カウントダウン
+        \advance\kn@linecount@internal by -\@ne\relax 
+        %%%
       }
       % 外枠描画
       \IfBooleanT{#1}{%
-        \draw[#2, line width=\noteLineWidth@kn*2.5] (0,0) rectangle (\linewidth, \the\dimexpr\VDNT@currentYPos-\VDNT@Yinterval\relax);
+        \draw[\VDNT@color, line width=\noteLineWidth@kn*2.5] (0,0) rectangle (\linewidth, \the\dimexpr\VDNT@currentYPos-\VDNT@Yinterval\relax);
       }%
       % 下端の三角
       % 座標を定義：(中心X, 最後の行Y - 4pt)
       \coordinate (BottomMarkerTip) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos-\VDNT@Yinterval-\noteTriangle@mag@kn*4pt);
-      \fill[#2] (BottomMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
+      \fill[\VDNT@color] (BottomMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
     \end{tikzpicture}%
   }%
   \egroup%
