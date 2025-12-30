@@ -1,5 +1,4 @@
-% 行数出せるように
-% masumeの方は、外枠囲えるように。
+% 行数出せるように（途中）
 
 \ProvidesPackage{keisennote}[2025/12/30, v1.2.0--undev]
 
@@ -62,6 +61,7 @@
 
 
 % 行間算出
+\newcount\kn@linecount@internal
 \newcommand{\cal@kn@internal}{%
   \FPeval\VDNT@dotsNum{round(round(((\the)\@tempcnta/(\the)\@tempcntb)/2:0)*2:0)}%
   \VDNT@Xinterval\dimexpr(\linewidth)/\VDNT@dotsNum\relax%
@@ -90,10 +90,17 @@
   \cal@kn@internal%
   \savepos@kn@internal@notefill%
   \cal@kn@internal@notefill%
+  %%%行数算出
+  \pgfmathtruncatemacro{\VDNT@totalLines}{floor(\VDNT@notegoal / \VDNT@Yinterval)}%
+  %%%
   % ノート罫線描画本体
   \noindent\smash{%
     \begin{tikzpicture}[xscale=\VDNT@xscaler]
       \VDNT@currentYPos\z@
+      %%%
+        \kn@linecount@internal=\VDNT@totalLines\relax % 初期値を総行数に設定
+        \advance\kn@linecount@internal by \@ne\relax %
+      %%%
       % 上端の三角
       \coordinate (TopMarkerTip) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos+\noteTriangle@mag@kn*4pt);
       \fill[#1] (TopMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,-\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
@@ -102,6 +109,11 @@
         % 横線の左端(L)と右端(R)
         \coordinate (L) at (0, \VDNT@currentYPos);
         \coordinate (R) at (\linewidth, \VDNT@currentYPos);
+        % --- 行番号の描画 ---
+          % 左端(L)のさらに左側に配置
+          \node[anchor=east, font=\scriptsize, text=#1, overlay]
+          at ([xshift=-5pt]L) {\the\kn@linecount@internal};
+        % --------------------
         % 罫線を引く
         \draw[#1, line width=\noteLineWidth@kn] (L) -- (R);
         % ループ内のドット描画部分 
@@ -125,6 +137,9 @@
         }
         % 次の行へ移動
         \advance\VDNT@currentYPos\VDNT@Yinterval\relax
+        %%%カウントダウン
+          \advance\kn@linecount@internal by -\@ne\relax 
+        %%%
       }
       % 下端の三角
       % 座標を定義：(中心X, 最後の行Y - 4pt)
