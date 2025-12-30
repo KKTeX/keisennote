@@ -273,7 +273,7 @@
       % --- 行番号の描画 ---
       \ifVDNT@shownumber
         \pgfmathtruncatemacro{\VDNT@currentnum}{#1 - \i + 1 }
-        \pgfmathtruncatemacro{\rem@notefill}{mod(\VDNT@currentnum,\VDNT@step)} % 上から順なら \i で判定するのが楽
+        \pgfmathtruncatemacro{\rem@notefill}{mod(\VDNT@currentnum,\VDNT@step)}
         \ifnum\rem@notefill=0
           \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-5pt]LineL) {\VDNT@currentnum};
         \fi
@@ -300,21 +300,34 @@
   \par%
 }
 
-\NewDocumentCommand{\masume}{ s m O{white!70!black} }{%
+\NewDocumentCommand{\masume}{ s m O{} }{%
   \par\bgroup%
+  \pgfkeys{/VDNT, default, #3}%
   \@tempcnta\linewidth%
   \@tempcntb\noteLineDistance@kn%
   \cal@kn@internal%
   \noindent%
   \begin{tikzpicture}[xscale=\VDNT@xscaler]
     \VDNT@currentYPos\z@
+    %%%
+    \kn@linecount@internal=#1\relax 
+    %%%
     \coordinate (TopMarker) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@Yinterval+\noteTriangle@mag@kn*4pt);
-    \fill[#3] (TopMarker) -- ++(\noteTriangle@mag@kn*3pt, -\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
+    \fill[\VDNT@color] (TopMarker) -- ++(\noteTriangle@mag@kn*3pt, -\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
     \foreach \i in {1, 2, ..., #2} {%
       \xdef\tempY{\the\dimexpr\VDNT@Yinterval*\i\relax}
       \coordinate (LineL) at (0, \tempY);
       \coordinate (LineR) at (\linewidth, \tempY);
-      \draw[#3, line width=\noteLineWidth@kn] (LineL) -- (LineR);
+      % --- 行番号の描画 ---
+      \ifVDNT@shownumber
+        \pgfmathtruncatemacro{\VDNT@currentnum}{#2 - \i + 1 }
+        \pgfmathtruncatemacro{\rem@notefill}{mod(\VDNT@currentnum,\VDNT@step)}
+        \ifnum\rem@notefill=0
+          \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-5pt]LineL) {\VDNT@currentnum};
+        \fi
+      \fi
+      % --------------------
+      \draw[\VDNT@color, line width=\noteLineWidth@kn] (LineL) -- (LineR);
       \foreach \k in {0, 1, ..., \VDNT@dotsNum} {%
         \pgfmathtruncatemacro{\VDNT@halfNum}{\VDNT@dotsNum/2}%
         \def\skipdot{0}%
@@ -322,22 +335,22 @@
         \ifnum\i=#2 \ifnum\k=\VDNT@halfNum \def\skipdot{1}\fi\fi
         % ------------------
         \ifnum\i<#2\relax
-          \draw[#3, line width=\noteLineWidth@kn] (\the\dimexpr\VDNT@Xinterval*\k\relax, \tempY) -- ++(0, \VDNT@Yinterval);
+          \draw[\VDNT@color, line width=\noteLineWidth@kn] (\the\dimexpr\VDNT@Xinterval*\k\relax, \tempY) -- ++(0, \VDNT@Yinterval);
         \fi
         % ------------------
         \ifnum\skipdot=0
           \coordinate (DotPos) at (\the\dimexpr\VDNT@Xinterval*\k\relax, \tempY);
-          \fill[#3] (DotPos) circle [radius=\noteDotsRadius@kn];
+          \fill[\VDNT@color] (DotPos) circle [radius=\noteDotsRadius@kn];
         \fi
       }%
       % 最後に使ったY座標を記録しておく（下の三角用）
       \ifnum\i=#2 \global\VDNT@currentYPos=\tempY\relax \fi
     }%
     \IfBooleanT{#1}{%
-      \draw[#3, line width=\noteLineWidth@kn*2.5] (0, \the\VDNT@Yinterval) rectangle (\linewidth, \VDNT@currentYPos);
+      \draw[\VDNT@color, line width=\noteLineWidth@kn*2.5] (0, \the\VDNT@Yinterval) rectangle (\linewidth, \VDNT@currentYPos);
     }%
     \coordinate (BottomMarker) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos-\noteTriangle@mag@kn*4pt);
-    \fill[#3] (BottomMarker) -- ++(\noteTriangle@mag@kn*3pt, \noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
+    \fill[\VDNT@color] (BottomMarker) -- ++(\noteTriangle@mag@kn*3pt, \noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
   \end{tikzpicture}%
   \egroup%
   \par%
