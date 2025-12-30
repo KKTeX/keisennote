@@ -121,7 +121,7 @@
         \ifVDNT@shownumber
           \pgfmathtruncatemacro{\rem@notefill}{mod(\kn@linecount@internal,\VDNT@step)}
           \ifnum\rem@notefill=0
-            \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-5pt]L) {\the\kn@linecount@internal};
+            \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-\f@size/2pt]L) {\the\kn@linecount@internal};
           \fi
         \fi
         % --------------------
@@ -195,7 +195,7 @@
         \ifVDNT@shownumber
           \pgfmathtruncatemacro{\rem@notefill}{mod(\kn@linecount@internal,\VDNT@step)}
           \ifnum\rem@notefill=0
-            \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-5pt]L) {\the\kn@linecount@internal};
+            \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-\f@size/2pt]L) {\the\kn@linecount@internal};
           \fi
         \fi
         % --------------------
@@ -273,7 +273,7 @@
         \pgfmathtruncatemacro{\VDNT@currentnum}{#1 - \i + 1 }
         \pgfmathtruncatemacro{\rem@notefill}{mod(\VDNT@currentnum,\VDNT@step)}
         \ifnum\rem@notefill=0
-          \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-5pt]LineL) {\VDNT@currentnum};
+          \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-\f@size/2pt]LineL) {\VDNT@currentnum};
         \fi
       \fi
       % --------------------
@@ -321,7 +321,7 @@
         \pgfmathtruncatemacro{\VDNT@currentnum}{#2 - \i + 1 }
         \pgfmathtruncatemacro{\rem@notefill}{mod(\VDNT@currentnum,\VDNT@step)}
         \ifnum\rem@notefill=0
-          \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-5pt]LineL) {\VDNT@currentnum};
+          \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-\f@size/2pt]LineL) {\VDNT@currentnum};
         \fi
       \fi
       % --------------------
