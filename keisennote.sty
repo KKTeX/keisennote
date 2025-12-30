@@ -1,4 +1,7 @@
-\ProvidesPackage{keisennote}[2025/12/30, v1.1.0]
+% 行数出せるように
+% masumeの方は、外枠囲えるように。
+
+\ProvidesPackage{keisennote}[2025/12/30, v1.2.0--undev]
 
 \RequirePackage[dvipsnames, svgnames, x11names]{xcolor}
 \RequirePackage{zref, zref-savepos, fp}
@@ -6,53 +9,46 @@
 
 \RequirePackage{kvoptions} 
 
-\SetupKeyvalOptions{%
-  family=kn,%
-  prefix=kn@%
+\SetupKeyvalOptions{
+  family=kn,
+  prefix=kn@
 }
 
 \newdimen\noteLineWidth@kn
-\noteLineWidth@kn=.5truept
-
-\newdimen\dotsRadius@kn
-\dotsRadius@kn=.8truept
-
+\newdimen\noteDotsRadius@kn
 \newdimen\noteLineDistance@kn
-\noteLineDistance@kn=6truemm
+\newdimen\noteTriangle@mag@kn
 
-\newdimen\@mag@kn
-\@mag@kn=.5pt
-
-%%%パッケージオプションの宣言
+% パッケージオプションの宣言
 \DeclareStringOption[.5truept]{linewidth}% 線の太さ
-\DeclareStringOption[.8truept]{radius}% ドットの大きさ
+\DeclareStringOption[.7truept]{radius}% ドットの大きさ
 \DeclareStringOption[6truemm]{distance}% ドットの間隔
-\DeclareStringOption[.5pt]{triangle}% 三角形の大きさ
+\DeclareStringOption[.7truept]{triangle}% 三角形の大きさ
+\ProcessKeyvalOptions* 
 
-\ProcessKeyvalOptions* % オプション適用
 
-%%%オプションの反映
+% オプションの反映
 \setlength{\noteLineWidth@kn}{\kn@linewidth}
-\setlength{\dotsRadius@kn}{\kn@radius}
+\setlength{\noteDotsRadius@kn}{\kn@radius}
 \setlength{\noteLineDistance@kn}{\kn@distance}
-\setlength{\@mag@kn}{\kn@triangle}
+\setlength{\noteTriangle@mag@kn}{\kn@triangle}
 
 
-%%%途中でパラメータ変更ができるように
+% 途中でパラメータ変更ができるように
 \NewDocumentCommand{\SetNoteLineWidth}{O{.5truept}}{%
   \setlength{\noteLineWidth@kn}{#1}
 }
 \NewDocumentCommand{\SetNoteDotRadius}{O{.8truept}}{%
-  \setlength{\dotsRadius@kn}{#1}
+  \setlength{\noteDotsRadius@kn}{#1}
 }
 \NewDocumentCommand{\SetNoteLineDistance}{O{6truemm}}{%
   \setlength{\noteLineDistance@kn}{#1}
 }
 \NewDocumentCommand{\SetNoteTriangleSize}{O{.5pt}}{%
-  \setlength{\@mag@kn}{#1}
+  \setlength{\noteTriangle@mag@kn}{#1}
 }
 
-%%%必要な内部レジスタの用意
+% 内部レジスタ
 \newdimen\VDNT@currentXPos
 \newdimen\VDNT@currentYPos
 \newdimen\VDNT@Xinterval
@@ -60,153 +56,224 @@
 \newdimen\VDNT@notegoal
 \def\VDNT@xscaler{.996}
 
-%%% \notefillで用いる座標管理用カウンタの準備
+% \notefillで用いる座標管理用カウンタの準備
 \def\VDNT@pkgname{vodnote}
 \global\newcount\VDNT@uniqe
 
 
-%%% \notefill の定義
-\NewDocumentCommand{\notefill}{ O{white!70!black} }{\par\bgroup
-  \parindent\z@
-  %%罫線間隔の算出
-  \@tempcnta\linewidth
-  \@tempcntb\noteLineDistance@kn
+% 行間算出
+\newcommand{\cal@kn@internal}{%
   \FPeval\VDNT@dotsNum{round(round(((\the)\@tempcnta/(\the)\@tempcntb)/2:0)*2:0)}%
-  \VDNT@Xinterval\dimexpr(\linewidth)/\VDNT@dotsNum\relax
-  \VDNT@Yinterval\VDNT@Xinterval
-  %%上端の座標取得
-  \zsaveposy{\VDNT@pkgname.\the\VDNT@uniqe.TopPos}%
-  %%下端の座標取得
-  \leavevmode\vfill\leavevmode
-  \zsaveposy{\VDNT@pkgname.\the\VDNT@uniqe.BottomPos}%
-  %%ノート罫線描画幅の決定
+  \VDNT@Xinterval\dimexpr(\linewidth)/\VDNT@dotsNum\relax%
+  \VDNT@Yinterval\VDNT@Xinterval%
+}
+
+
+% \notefill の定義
+% \notefill用内部マクロ
+\newcommand{\savepos@kn@internal@notefill}{%
+  \zsaveposy{\VDNT@pkgname.\the\VDNT@uniqe.TopPos}% 上端の座標取得
+  \leavevmode\vfill\leavevmode% 下まで移動→座標記憶
+  \zsaveposy{\VDNT@pkgname.\the\VDNT@uniqe.BottomPos}% 下端の座標取得
+}
+\newcommand{\cal@kn@internal@notefill}{%
   \VDNT@notegoal=\dimexpr
     \zposy{\VDNT@pkgname.\the\VDNT@uniqe.TopPos}sp
     -\zposy{\VDNT@pkgname.\the\VDNT@uniqe.BottomPos}sp
-  \relax
-  %%ノート罫線描画
+  \relax%
+}
+\NewDocumentCommand{\notefill}{ O{white!70!black} }{%
+  \par\bgroup%
+  \parindent\z@%
+  \@tempcnta\linewidth% 総横幅
+  \@tempcntb\noteLineDistance@kn% 単位横幅
+  \cal@kn@internal%
+  \savepos@kn@internal@notefill%
+  \cal@kn@internal@notefill%
+  % ノート罫線描画本体
   \noindent\smash{%
     \begin{tikzpicture}[xscale=\VDNT@xscaler]
       \VDNT@currentYPos\z@
-      \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\@mag@kn*4pt) -- ++(\@mag@kn*3pt,-\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle;
-      \@whiledim\VDNT@currentYPos<\VDNT@notegoal\do{
-        \VDNT@currentXPos\z@
-        \draw[#1,line width=\noteLineWidth@kn] (0,\VDNT@currentYPos) -- (\linewidth,\VDNT@currentYPos);
+      % 上端の三角
+      \coordinate (TopMarkerTip) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos+\noteTriangle@mag@kn*4pt);
+      \fill[#1] (TopMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,-\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
+      % 罫線とドットのループ描画 
+      \@whiledim\VDNT@currentYPos<\VDNT@notegoal\do{%
+        % 横線の左端(L)と右端(R)
+        \coordinate (L) at (0, \VDNT@currentYPos);
+        \coordinate (R) at (\linewidth, \VDNT@currentYPos);
+        % 罫線を引く
+        \draw[#1, line width=\noteLineWidth@kn] (L) -- (R);
+        % ループ内のドット描画部分 
         \foreach \k in{0,1,...,\VDNT@dotsNum}{%
-          \VDNT@currentXPos=\dimexpr\VDNT@Xinterval*\k\relax
-          \fill[#1] (\VDNT@currentXPos,\VDNT@currentYPos) circle [radius=\dotsRadius@kn];
+          \pgfmathtruncatemacro{\VDNT@halfNum}{\VDNT@dotsNum/2}%
+          \def\do@draw@dot{1}% 描画フラグを立てる
+          % 「現在の行が最初」かつ「kが真ん中」ならフラグを折る
+          \ifdim\VDNT@currentYPos=0pt\relax 
+            \ifnum\k=\VDNT@halfNum \def\do@draw@dot{0}\fi
+          \fi
+          % 「現在の行が最後（次がない）」かつ「kが真ん中」ならフラグを折る
+          % \VDNT@notegoal との比較で行う
+          \VDNT@currentXPos=\dimexpr\VDNT@currentYPos+\VDNT@Yinterval\relax
+          \ifdim\VDNT@currentXPos<\VDNT@notegoal\else
+            \ifnum\k=\VDNT@halfNum \def\do@draw@dot{0}\fi
+          \fi
+          \ifnum\do@draw@dot=1\relax
+            \coordinate (Dot) at (\the\dimexpr\VDNT@Xinterval*\k\relax, \VDNT@currentYPos);
+            \fill[#1] (Dot) circle [radius=\noteDotsRadius@kn];
+          \fi
         }
+        % 次の行へ移動
         \advance\VDNT@currentYPos\VDNT@Yinterval\relax
       }
-      \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos-\VDNT@Yinterval-\@mag@kn*4pt) -- ++(\@mag@kn*3pt,\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle;
+      % 下端の三角
+      % 座標を定義：(中心X, 最後の行Y - 4pt)
+      \coordinate (BottomMarkerTip) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos-\VDNT@Yinterval-\noteTriangle@mag@kn*4pt);
+      \fill[#1] (BottomMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
     \end{tikzpicture}%
   }%
-  \egroup
-  %%座標管理用カウンタのインクリメント
-  \global\advance\VDNT@uniqe\@ne
-  \par
+  \egroup%
+  \global\advance\VDNT@uniqe\@ne% 描画番号を進める
+  \par%
 }
 
-
-%%% \note の定義（２以上の整数を引数に）
-\NewDocumentCommand{\note}{ m O{white!70!black} }{\par\bgroup
-  %%罫線間隔の算出
-  \@tempcnta\linewidth
-  \@tempcntb\noteLineDistance@kn
-  \FPeval\VDNT@dotsNum{round(round(((\the)\@tempcnta/(\the)\@tempcntb)/2:0)*2:0)}%
-  \VDNT@Xinterval\dimexpr\linewidth/\VDNT@dotsNum\relax
-  \VDNT@Yinterval\VDNT@Xinterval
-  %%ノート罫線描画
-  \noindent
-    \begin{tikzpicture}[xscale=\VDNT@xscaler]
-      \VDNT@currentYPos\z@
-      \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VDNT@Yinterval+\@mag@kn*4pt) -- ++(\@mag@kn*3pt,-\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle; %上の三角形
-      \foreach \i in{1,2,...,#1}{ 
-        \VDNT@currentXPos\z@
-        \global\VDNT@currentYPos=\dimexpr\VDNT@Yinterval*\i\relax
-        \draw[#2,line width=\noteLineWidth@kn] (0,\VDNT@currentYPos) -- (\linewidth,\VDNT@currentYPos);
-        \foreach \k in{0,1,...,\VDNT@dotsNum}{
-          \VDNT@currentXPos=\dimexpr\VDNT@Xinterval*\k\relax
-          \fill[#2] (\VDNT@currentXPos,\VDNT@currentYPos) circle [radius=\dotsRadius@kn];
-        }
-      }
-      \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos-\@mag@kn*4pt) -- ++(\@mag@kn*3pt,\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle; %下の三角形
-    \end{tikzpicture}%
-  \egroup
-  \par
-}
-
-
-\NewDocumentCommand{\masumefill}{ O{white!70!black} }{\par\bgroup
-  \parindent\z@
-  %%罫線間隔の算出
-  \@tempcnta\linewidth
-  \@tempcntb\noteLineDistance@kn
-  \FPeval\VDNT@dotsNum{round(round(((\the)\@tempcnta/(\the)\@tempcntb)/2:0)*2:0)}%
-  \VDNT@Xinterval\dimexpr(\linewidth)/\VDNT@dotsNum\relax
-  \VDNT@Yinterval\VDNT@Xinterval
-  %%上端の座標取得
-  \zsaveposy{\VDNT@pkgname.\the\VDNT@uniqe.TopPos}%
-  %%下端の座標取得
-  \leavevmode\vfill\leavevmode
-  \zsaveposy{\VDNT@pkgname.\the\VDNT@uniqe.BottomPos}%
-  %%ノート罫線描画幅の決定
-  \VDNT@notegoal=\dimexpr
-    \zposy{\VDNT@pkgname.\the\VDNT@uniqe.TopPos}sp
-    -\zposy{\VDNT@pkgname.\the\VDNT@uniqe.BottomPos}sp
-  \relax
-  %%ノート罫線描画
+\NewDocumentCommand{\masumefill}{ O{white!70!black} }{%
+  \par\bgroup%
+  \parindent\z@%
+  \@tempcnta\linewidth% 総横幅
+  \@tempcntb\noteLineDistance@kn% 単位横幅
+  \cal@kn@internal%
+  \savepos@kn@internal@notefill%
+  \cal@kn@internal@notefill%
+  % ノート罫線描画本体
   \noindent\smash{%
     \begin{tikzpicture}[xscale=\VDNT@xscaler]
       \VDNT@currentYPos\z@
-      \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\@mag@kn*4pt) -- ++(\@mag@kn*3pt,-\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle;
-      \@whiledim\VDNT@currentYPos<\VDNT@notegoal\do{
-        \VDNT@currentXPos\z@
-        \draw[#1,line width=\noteLineWidth@kn] (0,\VDNT@currentYPos) -- (\linewidth,\VDNT@currentYPos);
+      % 上端の三角
+      \coordinate (TopMarkerTip) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos+\noteTriangle@mag@kn*4pt);
+      \fill[#1] (TopMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,-\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
+      % 罫線とドットのループ描画 
+      \@whiledim\VDNT@currentYPos<\VDNT@notegoal\do{%
+        % 横線の左端(L)と右端(R)
+        \coordinate (L) at (0, \VDNT@currentYPos);
+        \coordinate (R) at (\linewidth, \VDNT@currentYPos);
+        % 罫線を引く
+        \draw[#1, line width=\noteLineWidth@kn] (L) -- (R);
+        % ループ内のドット描画部分 
         \foreach \k in{0,1,...,\VDNT@dotsNum}{%
-          \VDNT@currentXPos=\dimexpr\VDNT@Xinterval*\k\relax
-          \draw[#1,line width=\noteLineWidth@kn]
-          (\VDNT@currentXPos,0) -- (\VDNT@currentXPos,\VDNT@currentYPos);
-          \fill[#1] (\VDNT@currentXPos,\VDNT@currentYPos) circle [radius=\dotsRadius@kn];
+          \pgfmathtruncatemacro{\VDNT@halfNum}{\VDNT@dotsNum/2}%
+          \def\do@draw@dot{1}% 描画フラグを立てる
+          % 「現在の行が最初」かつ「kが真ん中」ならフラグを折る
+          \ifdim\VDNT@currentYPos=0pt\relax 
+            \ifnum\k=\VDNT@halfNum \def\do@draw@dot{0}\fi
+          \fi
+          % 「現在の行が最後（次がない）」かつ「kが真ん中」ならフラグを折る
+          % \VDNT@notegoal との比較で行う
+          \VDNT@currentXPos=\dimexpr\VDNT@currentYPos+\VDNT@Yinterval\relax
+          \ifdim\VDNT@currentXPos<\VDNT@notegoal\else
+            \ifnum\k=\VDNT@halfNum \def\do@draw@dot{0}\fi
+          \fi
+          % ------------------
+          \coordinate (VBottom) at (\the\dimexpr\VDNT@Xinterval*\k\relax, \VDNT@currentYPos);
+          \VDNT@currentXPos=\dimexpr\VDNT@currentYPos+\VDNT@Yinterval\relax
+          \ifdim\VDNT@currentXPos<\VDNT@notegoal\relax
+            \draw[#1, line width=\noteLineWidth@kn] (VBottom) -- ++(0, \VDNT@Yinterval);
+          \fi
+          % ------------------
+          \ifnum\do@draw@dot=1\relax
+            \coordinate (Dot) at (\the\dimexpr\VDNT@Xinterval*\k\relax, \VDNT@currentYPos);
+            \fill[#1] (Dot) circle [radius=\noteDotsRadius@kn];
+          \fi
         }
+        % 次の行へ移動
         \advance\VDNT@currentYPos\VDNT@Yinterval\relax
       }
-      \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos-\VDNT@Yinterval-\@mag@kn*4pt) -- ++(\@mag@kn*3pt,\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle;
+      % 下端の三角
+      % 座標を定義：(中心X, 最後の行Y - 4pt)
+      \coordinate (BottomMarkerTip) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos-\VDNT@Yinterval-\noteTriangle@mag@kn*4pt);
+      \fill[#1] (BottomMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
     \end{tikzpicture}%
   }%
-  \egroup
-  %%座標管理用カウンタのインクリメント
-  \global\advance\VDNT@uniqe\@ne
-  \par
+  \egroup%
+  \global\advance\VDNT@uniqe\@ne% 描画番号を進める
+  \par%
 }
 
 
-\NewDocumentCommand{\masume}{ m O{white!70!black} }{\par\bgroup
-  %%罫線間隔の算出
-  \@tempcnta\linewidth
-  \@tempcntb\noteLineDistance@kn
-  \FPeval\VDNT@dotsNum{round(round(((\the)\@tempcnta/(\the)\@tempcntb)/2:0)*2:0)}%
-  \VDNT@Xinterval\dimexpr\linewidth/\VDNT@dotsNum\relax
-  \VDNT@Yinterval\VDNT@Xinterval
-  %%ノート罫線描画
-  \noindent
-    \begin{tikzpicture}[xscale=\VDNT@xscaler]
-      \VDNT@currentYPos\z@
-      \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VDNT@Yinterval+\@mag@kn*4pt) -- ++(\@mag@kn*3pt,-\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle; %上の三角形
-      \foreach \i in{1,2,...,#1}{ 
-        \VDNT@currentXPos\z@
-        \global\VDNT@currentYPos=\dimexpr\VDNT@Yinterval*\i\relax
-        \draw[#2,line width=\noteLineWidth@kn] (0,\VDNT@currentYPos) -- (\linewidth,\VDNT@currentYPos);
-        \foreach \k in{0,1,...,\VDNT@dotsNum}{
-          \VDNT@currentXPos=\dimexpr\VDNT@Xinterval*\k\relax
-          \draw[#2,line width=\noteLineWidth@kn] (\VDNT@currentXPos,\VDNT@Yinterval) -- (\VDNT@currentXPos,\VDNT@Yinterval*#1);
-          \fill[#2] (\VDNT@currentXPos,\VDNT@currentYPos) circle [radius=\dotsRadius@kn];
-        }
-      }
-      \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos-\@mag@kn*4pt) -- ++(\@mag@kn*3pt,\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle; %下の三角形
-    \end{tikzpicture}%
-  \egroup
-  \par
+% \note の定義（２以上の整数を引数に）
+\NewDocumentCommand{\note}{ m O{white!70!black} }{%
+  \par\bgroup%
+  \@tempcnta\linewidth%
+  \@tempcntb\noteLineDistance@kn%
+  \cal@kn@internal%
+  \noindent%
+  \begin{tikzpicture}[xscale=\VDNT@xscaler]
+    \VDNT@currentYPos\z@
+    \coordinate (TopMarker) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@Yinterval+\noteTriangle@mag@kn*4pt);
+    \fill[#2] (TopMarker) -- ++(\noteTriangle@mag@kn*3pt, -\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
+    \foreach \i in {1, 2, ..., #1} {%
+      \xdef\tempY{\the\dimexpr\VDNT@Yinterval*\i\relax}
+      \coordinate (LineL) at (0, \tempY);
+      \coordinate (LineR) at (\linewidth, \tempY);
+      \draw[#2, line width=\noteLineWidth@kn] (LineL) -- (LineR);
+      \foreach \k in {0, 1, ..., \VDNT@dotsNum} {%
+        \pgfmathtruncatemacro{\VDNT@halfNum}{\VDNT@dotsNum/2}%
+        \def\skipdot{0}%
+        \ifnum\i=1 \ifnum\k=\VDNT@halfNum \def\skipdot{1}\fi\fi
+        \ifnum\i=#1 \ifnum\k=\VDNT@halfNum \def\skipdot{1}\fi\fi
+        \ifnum\skipdot=0
+          \coordinate (DotPos) at (\the\dimexpr\VDNT@Xinterval*\k\relax, \tempY);
+          \fill[#2] (DotPos) circle [radius=\noteDotsRadius@kn];
+        \fi
+      }%
+      % 最後に使ったY座標を記録しておく（下の三角用）
+      \ifnum\i=#1 \global\VDNT@currentYPos=\tempY\relax \fi
+    }%
+    \coordinate (BottomMarker) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos-\noteTriangle@mag@kn*4pt);
+    \fill[#2] (BottomMarker) -- ++(\noteTriangle@mag@kn*3pt, \noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
+  \end{tikzpicture}%
+  \egroup%
+  \par%
+}
+
+\NewDocumentCommand{\masume}{ m O{white!70!black} }{%
+  \par\bgroup%
+  \@tempcnta\linewidth%
+  \@tempcntb\noteLineDistance@kn%
+  \cal@kn@internal%
+  \noindent%
+  \begin{tikzpicture}[xscale=\VDNT@xscaler]
+    \VDNT@currentYPos\z@
+    \coordinate (TopMarker) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@Yinterval+\noteTriangle@mag@kn*4pt);
+    \fill[#2] (TopMarker) -- ++(\noteTriangle@mag@kn*3pt, -\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
+    \foreach \i in {1, 2, ..., #1} {%
+      \xdef\tempY{\the\dimexpr\VDNT@Yinterval*\i\relax}
+      \coordinate (LineL) at (0, \tempY);
+      \coordinate (LineR) at (\linewidth, \tempY);
+      \draw[#2, line width=\noteLineWidth@kn] (LineL) -- (LineR);
+      \foreach \k in {0, 1, ..., \VDNT@dotsNum} {%
+        \pgfmathtruncatemacro{\VDNT@halfNum}{\VDNT@dotsNum/2}%
+        \def\skipdot{0}%
+        \ifnum\i=1 \ifnum\k=\VDNT@halfNum \def\skipdot{1}\fi\fi
+        \ifnum\i=#1 \ifnum\k=\VDNT@halfNum \def\skipdot{1}\fi\fi
+        % ------------------
+        \ifnum\i<#1\relax
+          \draw[#2, line width=\noteLineWidth@kn] (\the\dimexpr\VDNT@Xinterval*\k\relax, \tempY) -- ++(0, \VDNT@Yinterval);
+        \fi
+        % ------------------
+        \ifnum\skipdot=0
+          \coordinate (DotPos) at (\the\dimexpr\VDNT@Xinterval*\k\relax, \tempY);
+          \fill[#2] (DotPos) circle [radius=\noteDotsRadius@kn];
+        \fi
+      }%
+      % 最後に使ったY座標を記録しておく（下の三角用）
+      \ifnum\i=#1 \global\VDNT@currentYPos=\tempY\relax \fi
+    }%
+    \coordinate (BottomMarker) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos-\noteTriangle@mag@kn*4pt);
+    \fill[#2] (BottomMarker) -- ++(\noteTriangle@mag@kn*3pt, \noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
+  \end{tikzpicture}%
+  \egroup%
+  \par%
 }
 
 \endinput
