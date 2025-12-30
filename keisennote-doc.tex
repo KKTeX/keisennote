@@ -142,17 +142,17 @@ The available options and their default values are listed below.
     \midrule
     \texttt{linewidth} & \texttt{.5truept}
       & Width of the line used for note drawing.  
-        The value is assigned internally to \verb|\noteLineWidth|.  
+        The value is assigned internally to \verb|\noteLineWidth@kn|.  
         Any \TeX\ length (e.g.\ \texttt{1pt}, \texttt{0.6truept}, \texttt{0.2mm}) is accepted. \\
     \texttt{radius} & \texttt{.8truept}
       & Radius of each dot.  
-        Internally stored in \verb|\dotsRadius|. \\
+        Internally stored in \verb|\dotsRadius@kn|. \\
     \texttt{distance} & \texttt{6truemm}
       & Spacing between adjacent dots.  
-        Internally stored in \verb|\noteLineDistance|. \\
+        Internally stored in \verb|\noteLineDistance@kn|. \\
     \texttt{triangle} & \texttt{.5pt}
       & Size of triangular markers.  
-        Internally stored in \verb|\VoD@mag|. \\
+        Internally stored in \verb|\@mag@kn|. \\
     \bottomrule
   \end{tabular}
 \end{center}
@@ -164,10 +164,10 @@ The available options and their default values are listed below.
   The package then assigns it to a \verb|\dimen| register, for example:
 
   \begin{SourceCode}{TeX}
-    \noteLineWidth=\kn@linewidth\relax
-    \dotsRadius=\kn@radius\relax
-    \noteLineDistance=\kn@distance\relax
-    \VoD@mag=\kn@triangle\relax
+    \noteLineWidth@kn=\kn@linewidth\relax
+    \dotsRadius@kn=\kn@radius\relax
+    \noteLineDistance@kn=\kn@distance\relax
+    \@mag@kn=\kn@triangle\relax
   \end{SourceCode}
 
   This conversion ensures that user-supplied expressions such as \texttt{1truept} or \texttt{0.5mm} are properly interpreted as lengths.
@@ -185,7 +185,7 @@ The available options and their default values are listed below.
   \item Modify options afterwards using \verb|\setkeys|:
   \begin{SourceCode}{TeX}
     \setkeys{kn}{linewidth=0.8pt, distance=5mm}
-    \noteLineWidth=\kn@linewidth\relax  % reassign to internal registers if needed
+    \noteLineWidth@kn=\kn@linewidth\relax  % reassign to internal registers if needed
   \end{SourceCode}
 \end{itemize}
 
@@ -320,7 +320,7 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
   \item \textbf{v1.0.3 (2025/09/13)} --- KKTeX added \texttt{\textbackslash masume} and \texttt{\textbackslash masumefill}.
   \item \textbf{v1.0.4 (2025/10/4)} --- KKTeX fixed the problem in \verb|\masumefill| and added some package options and setting commands.
   \item \textbf{v1.0.4a (2025/10/5)} --- Added some descriptions about new package options.
-  \item \textbf{v1.0.4a (2025/10/5)} --- Inproved package documentation.
+  \item \textbf{v1.0.4b (2025/12/27)} --- Changed License.
 \end{itemize}
 
 \section{Source Code}
@@ -338,17 +338,17 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
       prefix=kn@%
     }
 
-    \newdimen\noteLineWidth
-    \noteLineWidth=.5truept
+    \newdimen\noteLineWidth@kn
+    \noteLineWidth@kn=.5truept
 
-    \newdimen\dotsRadius
-    \dotsRadius=.8truept
+    \newdimen\dotsRadius@kn
+    \dotsRadius@kn=.8truept
 
-    \newdimen\noteLineDistance
-    \noteLineDistance=6truemm
+    \newdimen\noteLineDistance@kn
+    \noteLineDistance@kn=6truemm
 
-    \newdimen\VoD@mag
-    \VoD@mag=.5pt
+    \newdimen\@mag@kn
+    \@mag@kn=.5pt
 
     %%%パッケージオプションの宣言
     \DeclareStringOption[.5truept]{linewidth}% 線の太さ
@@ -359,24 +359,24 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
     \ProcessKeyvalOptions* % オプション適用
 
     %%%オプションの反映
-    \setlength{\noteLineWidth}{\kn@linewidth}
-    \setlength{\dotsRadius}{\kn@radius}
-    \setlength{\noteLineDistance}{\kn@distance}
-    \setlength{\VoD@mag}{\kn@triangle}
+    \setlength{\noteLineWidth@kn}{\kn@linewidth}
+    \setlength{\dotsRadius@kn}{\kn@radius}
+    \setlength{\noteLineDistance@kn}{\kn@distance}
+    \setlength{\@mag@kn}{\kn@triangle}
 
 
     %%%途中でパラメータ変更ができるように
     \NewDocumentCommand{\SetNoteLineWidth}{O{.5truept}}{%
-      \setlength{\noteLineWidth}{#1}
+      \setlength{\noteLineWidth@kn}{#1}
     }
     \NewDocumentCommand{\SetNoteDotRadius}{O{.8truept}}{%
-      \setlength{\dotsRadius}{#1}
+      \setlength{\dotsRadius@kn}{#1}
     }
     \NewDocumentCommand{\SetNoteLineDistance}{O{6truemm}}{%
-      \setlength{\noteLineDistance}{#1}
+      \setlength{\noteLineDistance@kn}{#1}
     }
     \NewDocumentCommand{\SetNoteTriangleSize}{O{.5pt}}{%
-      \setlength{\VoD@mag}{#1}
+      \setlength{\@mag@kn}{#1}
     }
 
     %%%必要な内部レジスタの用意
@@ -397,7 +397,7 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
       \parindent\z@
       %%罫線間隔の算出
       \@tempcnta\linewidth
-      \@tempcntb\noteLineDistance
+      \@tempcntb\noteLineDistance@kn
       \FPeval\VDNT@dotsNum{round(round(((\the)\@tempcnta/(\the)\@tempcntb)/2:0)*2:0)}%
       \VDNT@Xinterval\dimexpr(\linewidth)/\VDNT@dotsNum\relax
       \VDNT@Yinterval\VDNT@Xinterval
@@ -415,17 +415,17 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
       \noindent\smash{%
         \begin{tikzpicture}[xscale=\VDNT@xscaler]
           \VDNT@currentYPos\z@
-          \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VoD@mag*4pt) -- ++(\VoD@mag*3pt,-\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle;
+          \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\@mag@kn*4pt) -- ++(\@mag@kn*3pt,-\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle;
           \@whiledim\VDNT@currentYPos<\VDNT@notegoal\do{
             \VDNT@currentXPos\z@
-            \draw[#1,line width=\noteLineWidth] (0,\VDNT@currentYPos) -- (\linewidth,\VDNT@currentYPos);
+            \draw[#1,line width=\noteLineWidth@kn] (0,\VDNT@currentYPos) -- (\linewidth,\VDNT@currentYPos);
             \foreach \k in{0,1,...,\VDNT@dotsNum}{%
               \VDNT@currentXPos=\dimexpr\VDNT@Xinterval*\k\relax
-              \fill[#1] (\VDNT@currentXPos,\VDNT@currentYPos) circle [radius=\dotsRadius];
+              \fill[#1] (\VDNT@currentXPos,\VDNT@currentYPos) circle [radius=\dotsRadius@kn];
             }
             \advance\VDNT@currentYPos\VDNT@Yinterval\relax
           }
-          \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos-\VDNT@Yinterval-\VoD@mag*4pt) -- ++(\VoD@mag*3pt,\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle;
+          \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos-\VDNT@Yinterval-\@mag@kn*4pt) -- ++(\@mag@kn*3pt,\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle;
         \end{tikzpicture}%
       }%
       \egroup
@@ -439,7 +439,7 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
     \NewDocumentCommand{\note}{ m O{white!70!black} }{\par\bgroup
       %%罫線間隔の算出
       \@tempcnta\linewidth
-      \@tempcntb\noteLineDistance
+      \@tempcntb\noteLineDistance@kn
       \FPeval\VDNT@dotsNum{round(round(((\the)\@tempcnta/(\the)\@tempcntb)/2:0)*2:0)}%
       \VDNT@Xinterval\dimexpr\linewidth/\VDNT@dotsNum\relax
       \VDNT@Yinterval\VDNT@Xinterval
@@ -447,17 +447,17 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
       \noindent
         \begin{tikzpicture}[xscale=\VDNT@xscaler]
           \VDNT@currentYPos\z@
-          \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VDNT@Yinterval+\VoD@mag*4pt) -- ++(\VoD@mag*3pt,-\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle; %上の三角形
+          \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VDNT@Yinterval+\@mag@kn*4pt) -- ++(\@mag@kn*3pt,-\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle; %上の三角形
           \foreach \i in{1,2,...,#1}{ 
             \VDNT@currentXPos\z@
             \global\VDNT@currentYPos=\dimexpr\VDNT@Yinterval*\i\relax
-            \draw[#2,line width=\noteLineWidth] (0,\VDNT@currentYPos) -- (\linewidth,\VDNT@currentYPos);
+            \draw[#2,line width=\noteLineWidth@kn] (0,\VDNT@currentYPos) -- (\linewidth,\VDNT@currentYPos);
             \foreach \k in{0,1,...,\VDNT@dotsNum}{
               \VDNT@currentXPos=\dimexpr\VDNT@Xinterval*\k\relax
-              \fill[#2] (\VDNT@currentXPos,\VDNT@currentYPos) circle [radius=\dotsRadius];
+              \fill[#2] (\VDNT@currentXPos,\VDNT@currentYPos) circle [radius=\dotsRadius@kn];
             }
           }
-          \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos-\VoD@mag*4pt) -- ++(\VoD@mag*3pt,\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle; %下の三角形
+          \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos-\@mag@kn*4pt) -- ++(\@mag@kn*3pt,\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle; %下の三角形
         \end{tikzpicture}%
       \egroup
       \par
@@ -468,7 +468,7 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
       \parindent\z@
       %%罫線間隔の算出
       \@tempcnta\linewidth
-      \@tempcntb\noteLineDistance
+      \@tempcntb\noteLineDistance@kn
       \FPeval\VDNT@dotsNum{round(round(((\the)\@tempcnta/(\the)\@tempcntb)/2:0)*2:0)}%
       \VDNT@Xinterval\dimexpr(\linewidth)/\VDNT@dotsNum\relax
       \VDNT@Yinterval\VDNT@Xinterval
@@ -486,19 +486,19 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
       \noindent\smash{%
         \begin{tikzpicture}[xscale=\VDNT@xscaler]
           \VDNT@currentYPos\z@
-          \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VoD@mag*4pt) -- ++(\VoD@mag*3pt,-\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle;
+          \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\@mag@kn*4pt) -- ++(\@mag@kn*3pt,-\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle;
           \@whiledim\VDNT@currentYPos<\VDNT@notegoal\do{
             \VDNT@currentXPos\z@
-            \draw[#1,line width=\noteLineWidth] (0,\VDNT@currentYPos) -- (\linewidth,\VDNT@currentYPos);
+            \draw[#1,line width=\noteLineWidth@kn] (0,\VDNT@currentYPos) -- (\linewidth,\VDNT@currentYPos);
             \foreach \k in{0,1,...,\VDNT@dotsNum}{%
               \VDNT@currentXPos=\dimexpr\VDNT@Xinterval*\k\relax
-              \draw[#1,line width=\noteLineWidth]
+              \draw[#1,line width=\noteLineWidth@kn]
               (\VDNT@currentXPos,0) -- (\VDNT@currentXPos,\VDNT@currentYPos);
-              \fill[#1] (\VDNT@currentXPos,\VDNT@currentYPos) circle [radius=\dotsRadius];
+              \fill[#1] (\VDNT@currentXPos,\VDNT@currentYPos) circle [radius=\dotsRadius@kn];
             }
             \advance\VDNT@currentYPos\VDNT@Yinterval\relax
           }
-          \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos-\VDNT@Yinterval-\VoD@mag*4pt) -- ++(\VoD@mag*3pt,\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle;
+          \fill[#1] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos-\VDNT@Yinterval-\@mag@kn*4pt) -- ++(\@mag@kn*3pt,\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle;
         \end{tikzpicture}%
       }%
       \egroup
@@ -511,7 +511,7 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
     \NewDocumentCommand{\masume}{ m O{white!70!black} }{\par\bgroup
       %%罫線間隔の算出
       \@tempcnta\linewidth
-      \@tempcntb\noteLineDistance
+      \@tempcntb\noteLineDistance@kn
       \FPeval\VDNT@dotsNum{round(round(((\the)\@tempcnta/(\the)\@tempcntb)/2:0)*2:0)}%
       \VDNT@Xinterval\dimexpr\linewidth/\VDNT@dotsNum\relax
       \VDNT@Yinterval\VDNT@Xinterval
@@ -519,18 +519,18 @@ Released under the \href{https://www.latex-project.org/lppl/}{LaTeX Project Publ
       \noindent
         \begin{tikzpicture}[xscale=\VDNT@xscaler]
           \VDNT@currentYPos\z@
-          \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VDNT@Yinterval+\VoD@mag*4pt) -- ++(\VoD@mag*3pt,-\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle; %上の三角形
+          \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos+\VDNT@Yinterval+\@mag@kn*4pt) -- ++(\@mag@kn*3pt,-\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle; %上の三角形
           \foreach \i in{1,2,...,#1}{ 
             \VDNT@currentXPos\z@
             \global\VDNT@currentYPos=\dimexpr\VDNT@Yinterval*\i\relax
-            \draw[#2,line width=\noteLineWidth] (0,\VDNT@currentYPos) -- (\linewidth,\VDNT@currentYPos);
+            \draw[#2,line width=\noteLineWidth@kn] (0,\VDNT@currentYPos) -- (\linewidth,\VDNT@currentYPos);
             \foreach \k in{0,1,...,\VDNT@dotsNum}{
               \VDNT@currentXPos=\dimexpr\VDNT@Xinterval*\k\relax
-              \draw[#2,line width=\noteLineWidth] (\VDNT@currentXPos,\VDNT@Yinterval) -- (\VDNT@currentXPos,\VDNT@Yinterval*#1);
-              \fill[#2] (\VDNT@currentXPos,\VDNT@currentYPos) circle [radius=\dotsRadius];
+              \draw[#2,line width=\noteLineWidth@kn] (\VDNT@currentXPos,\VDNT@Yinterval) -- (\VDNT@currentXPos,\VDNT@Yinterval*#1);
+              \fill[#2] (\VDNT@currentXPos,\VDNT@currentYPos) circle [radius=\dotsRadius@kn];
             }
           }
-          \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos-\VoD@mag*4pt) -- ++(\VoD@mag*3pt,\VoD@mag*4pt) -- ++(-\VoD@mag*6pt,0) -- cycle; %下の三角形
+          \fill[#2] (\VDNT@Xinterval*\VDNT@dotsNum/2,\VDNT@currentYPos-\@mag@kn*4pt) -- ++(\@mag@kn*3pt,\@mag@kn*4pt) -- ++(-\@mag@kn*6pt,0) -- cycle; %下の三角形
         \end{tikzpicture}%
       \egroup
       \par
