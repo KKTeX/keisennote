@@ -11,7 +11,7 @@
 `keisennote` is a LaTeX package for typesetting Japanese-style ruled notebook lines. It supports both full-page fills and short blocks of lines, making it ideal for creating worksheets or study materials.
 `keisennote` は、日本式のノート罫線を組版するためのパッケージです。ページ全体を罫線で埋める機能や、短いブロックとしての配置に対応しており、学習プリントや教材の作成に最適です。
 
-- **Version**: 1.1.0
+- **Version**: 1.2.0
 - **Date**: 2025-12-30
 - **Author**: Kosei Kawaguchi (a.k.a. KKTeX)
 - **License**: MIT（LPPL 1.3c から変更）
