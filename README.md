@@ -9,6 +9,7 @@
 ## Overview / 概要
 
 `keisennote` is a LaTeX package for typesetting Japanese-style ruled notebook lines. It supports both full-page fills and short blocks of lines, making it ideal for creating worksheets or study materials.
+
 `keisennote` は、日本式のノート罫線を組版するためのパッケージです。ページ全体を罫線で埋める機能や、短いブロックとしての配置に対応しており、学習プリントや教材の作成に最適です。
 
 - **Version**: 1.2.0
@@ -38,8 +39,8 @@
 ---
 
 ## Credit / クレジット
+Derived from [VoD's Qiita article](https://qiita.com/VoD/items/6849e63b978050218d2f) with permission. Special thanks to VoD for their contribution to the TeX community.
 
-This package is based on [VoD's Qiita article](https://qiita.com/VoD/items/6849e63b978050218d2f) and has been released with the author's permission.
 本パッケージは、VoD氏によるQiitaの記事をベースにしており、著者の許可を得て公開されています。
 
 ---
@@ -47,6 +48,7 @@ This package is based on [VoD's Qiita article](https://qiita.com/VoD/items/6849e
 ## Usage / 使用方法
 
 For detailed usage and examples, please refer to the documentation file: `keisennote-doc.tex`.
+
 具体的な使用方法や例については、ドキュメントファイル `keisennote-doc.tex` を参照してください。
 
 ---
