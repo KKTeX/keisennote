@@ -1,7 +1,7 @@
 %%% License %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This package is licensed under the terms of the MIT License.
 
-% Copyright (c) 2025 Kosei Kawaguchi
+% Copyright (c) 2025-2026 Kosei Kawaguchi
 
 % Permission is hereby granted, free of charge, 
 % to any person obtaining a copy of this software and associated documentation files 
@@ -23,66 +23,74 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{keisennote}[2026/02/02, v1.2.1]
 
-\ProvidesPackage{keisennote}[2025/12/30, v1.2.0]
-
+%%% basical settings
 \RequirePackage[dvipsnames, svgnames, x11names]{xcolor}
 \RequirePackage{zref, zref-savepos, fp}
 \RequirePackage{tikz}
+\RequirePackage{kvoptions, pgfkeys} 
+%%%
 
-\RequirePackage{kvoptions} 
 
+%%% keyval package options
 \SetupKeyvalOptions{
   family=kn,
   prefix=kn@
 }
+\DeclareStringOption[.5truept]{linewidth}
+  % 線の太さ
+\DeclareStringOption[.7truept]{radius}
+  % ドットの大きさ
+\DeclareStringOption[6truemm]{distance}
+  % ドットの間隔
+\DeclareStringOption[.7truept]{triangle}
+  % 三角形の大きさ
+\ProcessKeyvalOptions* 
 
 \newdimen\noteLineWidth@kn
 \newdimen\noteDotsRadius@kn
 \newdimen\noteLineDistance@kn
 \newdimen\noteTriangle@mag@kn
-
-% パッケージオプションの宣言
-\DeclareStringOption[.5truept]{linewidth}% 線の太さ
-\DeclareStringOption[.7truept]{radius}% ドットの大きさ
-\DeclareStringOption[6truemm]{distance}% ドットの間隔
-\DeclareStringOption[.7truept]{triangle}% 三角形の大きさ
-\ProcessKeyvalOptions* 
-
-
-% オプションの反映
 \setlength{\noteLineWidth@kn}{\kn@linewidth}
 \setlength{\noteDotsRadius@kn}{\kn@radius}
 \setlength{\noteLineDistance@kn}{\kn@distance}
 \setlength{\noteTriangle@mag@kn}{\kn@triangle}
+%%%
 
 
-% 途中でパラメータ変更ができるように
-\NewDocumentCommand{\SetNoteLineWidth}{O{.5truept}}{%
-  \setlength{\noteLineWidth@kn}{#1}
-}
-\NewDocumentCommand{\SetNoteDotRadius}{O{.7truept}}{%
-  \setlength{\noteDotsRadius@kn}{#1}
-}
-\NewDocumentCommand{\SetNoteLineDistance}{O{6truemm}}{%
-  \setlength{\noteLineDistance@kn}{#1}
-}
-\NewDocumentCommand{\SetNoteTriangleSize}{O{.7truept}}{%
-  \setlength{\noteTriangle@mag@kn}{#1}
+%%% setting commands
+\pgfkeys{
+  /KKTeX/keisen/.is family,
+  /KKTeX/keisen,
+  linewidth/.code = {\setlength{\noteLineWidth@kn}{#1}},
+  radius/.code    = {\setlength{\noteDotsRadius@kn}{#1}},
+  distance/.code  = {\setlength{\noteLineDistance@kn}{#1}},
+  triangle/.code  = {\setlength{\noteTriangle@mag@kn}{#1}},
 }
 
-% 内部レジスタ
+\NewDocumentCommand{\SetKeisenNote}{O{}}{%
+  \pgfkeys{/KKTeX/keisen, #1}%
+}
+%%%
+
+
+%%% internal parameter
 \newdimen\VDNT@currentXPos
 \newdimen\VDNT@currentYPos
 \newdimen\VDNT@Xinterval
 \newdimen\VDNT@Yinterval
 \newdimen\VDNT@notegoal
+
 \def\VDNT@xscaler{.996}
 
-% \notefillで用いる座標管理用カウンタの準備
 \def\VDNT@pkgname{vodnote}
 \global\newcount\VDNT@uniqe
+%%%
 
+
+%%% 以下keisennoteのメイン
 
 % 行間算出
 \newcount\kn@linecount@internal
@@ -92,13 +100,14 @@
   \VDNT@Yinterval\VDNT@Xinterval%
 }
 
-
-% \notefill の定義
-% \notefill用内部マクロ
+% \notefill 
 \newcommand{\savepos@kn@internal@notefill}{%
-  \zsaveposy{\VDNT@pkgname.\the\VDNT@uniqe.TopPos}% 上端の座標取得
-  \leavevmode\vfill\leavevmode% 下まで移動→座標記憶
-  \zsaveposy{\VDNT@pkgname.\the\VDNT@uniqe.BottomPos}% 下端の座標取得
+  \zsaveposy{\VDNT@pkgname.\the\VDNT@uniqe.TopPos}% 
+    % 上端の座標取得
+  \leavevmode\vfill\leavevmode% 
+    % 下まで移動→座標記憶
+  \zsaveposy{\VDNT@pkgname.\the\VDNT@uniqe.BottomPos}% 
+    % 下端の座標取得
 }
 \newcommand{\cal@kn@internal@notefill}{%
   \VDNT@notegoal=\dimexpr
@@ -119,50 +128,40 @@
   \par\bgroup%
   \pgfkeys{/VDNT, default, #1}%
   \parindent\z@%
-  \@tempcnta\linewidth% 総横幅
-  \@tempcntb\noteLineDistance@kn% 単位横幅
+  \@tempcnta\linewidth% 
+    % 総横幅
+  \@tempcntb\noteLineDistance@kn% 
+    % 単位横幅
   \cal@kn@internal%
   \savepos@kn@internal@notefill%
   \cal@kn@internal@notefill%
-  %%%行数算出
   \pgfmathtruncatemacro{\VDNT@totalLines}{floor(\VDNT@notegoal / \VDNT@Yinterval)}%
-  %%%
-  % ノート罫線描画本体
+    % 行間算出 
   \noindent\smash{%
     \begin{tikzpicture}[xscale=\VDNT@xscaler]
       \VDNT@currentYPos\z@
-      %%%
-      \kn@linecount@internal=\VDNT@totalLines\relax % 初期値を総行数に設定
-      \advance\kn@linecount@internal by \@ne\relax %
-      %%%
-      % 上端の三角
+      % --
+      \kn@linecount@internal=\VDNT@totalLines\relax% 
+      \advance\kn@linecount@internal by \@ne\relax%
+      % --
       \coordinate (TopMarkerTip) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos+\noteTriangle@mag@kn*4pt);
       \fill[\VDNT@color] (TopMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,-\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
-      % 罫線とドットのループ描画 
       \@whiledim\VDNT@currentYPos<\VDNT@notegoal\do{%
-        % 横線の左端(L)と右端(R)
         \coordinate (L) at (0, \VDNT@currentYPos);
         \coordinate (R) at (\linewidth, \VDNT@currentYPos);
-        % --- 行番号の描画 ---
         \ifVDNT@shownumber
           \pgfmathtruncatemacro{\rem@notefill}{mod(\kn@linecount@internal,\VDNT@step)}
           \ifnum\rem@notefill=0
             \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-\f@size/2pt]L) {\the\kn@linecount@internal};
           \fi
         \fi
-        % --------------------
-        % 罫線を引く
         \draw[\VDNT@color, line width=\noteLineWidth@kn] (L) -- (R);
-        % ループ内のドット描画部分 
         \foreach \k in{0,1,...,\VDNT@dotsNum}{%
           \pgfmathtruncatemacro{\VDNT@halfNum}{\VDNT@dotsNum/2}%
-          \def\do@draw@dot{1}% 描画フラグを立てる
-          % 「現在の行が最初」かつ「kが真ん中」ならフラグを折る
+          \def\do@draw@dot{1}% 
           \ifdim\VDNT@currentYPos=0pt\relax 
             \ifnum\k=\VDNT@halfNum \def\do@draw@dot{0}\fi
           \fi
-          % 「現在の行が最後（次がない）」かつ「kが真ん中」ならフラグを折る
-          % \VDNT@notegoal との比較で行う
           \VDNT@currentXPos=\dimexpr\VDNT@currentYPos+\VDNT@Yinterval\relax
           \ifdim\VDNT@currentXPos<\VDNT@notegoal\else
             \ifnum\k=\VDNT@halfNum \def\do@draw@dot{0}\fi
@@ -172,20 +171,15 @@
             \fill[\VDNT@color] (Dot) circle [radius=\noteDotsRadius@kn];
           \fi
         }
-        % 次の行へ移動
         \advance\VDNT@currentYPos\VDNT@Yinterval\relax
-        %%%カウントダウン
         \advance\kn@linecount@internal by -\@ne\relax 
-        %%%
       }
-      % 下端の三角
-      % 座標を定義：(中心X, 最後の行Y - 4pt)
       \coordinate (BottomMarkerTip) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos-\VDNT@Yinterval-\noteTriangle@mag@kn*4pt);
       \fill[\VDNT@color] (BottomMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
     \end{tikzpicture}%
   }%
   \egroup%
-  \global\advance\VDNT@uniqe\@ne% 描画番号を進める
+  \global\advance\VDNT@uniqe\@ne%
   \par%
 }
 
@@ -193,50 +187,35 @@
   \par\bgroup%
   \pgfkeys{/VDNT, default, #2}%
   \parindent\z@%
-  \@tempcnta\linewidth% 総横幅
-  \@tempcntb\noteLineDistance@kn% 単位横幅
+  \@tempcnta\linewidth%
+  \@tempcntb\noteLineDistance@kn%
   \cal@kn@internal%
   \savepos@kn@internal@notefill%
   \cal@kn@internal@notefill%
-  %%%行数算出
   \pgfmathtruncatemacro{\VDNT@totalLines}{floor(\VDNT@notegoal / \VDNT@Yinterval)}%
-  %%%
-  % ノート罫線描画本体
   \noindent\smash{%
     \begin{tikzpicture}[xscale=\VDNT@xscaler]
       \VDNT@currentYPos\z@
-      %%%
-      \kn@linecount@internal=\VDNT@totalLines\relax % 初期値を総行数に設定
-      \advance\kn@linecount@internal by \@ne\relax %
-      %%%
-      % 上端の三角
+      \kn@linecount@internal=\VDNT@totalLines\relax%
+      \advance\kn@linecount@internal by \@ne\relax%
       \coordinate (TopMarkerTip) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos+\noteTriangle@mag@kn*4pt);
       \fill[\VDNT@color] (TopMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,-\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
-      % 罫線とドットのループ描画 
       \@whiledim\VDNT@currentYPos<\VDNT@notegoal\do{%
-        % 横線の左端(L)と右端(R)
         \coordinate (L) at (0, \VDNT@currentYPos);
         \coordinate (R) at (\linewidth, \VDNT@currentYPos);
-        % --- 行番号の描画 ---
         \ifVDNT@shownumber
           \pgfmathtruncatemacro{\rem@notefill}{mod(\kn@linecount@internal,\VDNT@step)}
           \ifnum\rem@notefill=0
             \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-\f@size/2pt]L) {\the\kn@linecount@internal};
           \fi
         \fi
-        % --------------------
-        % 罫線を引く
         \draw[\VDNT@color, line width=\noteLineWidth@kn] (L) -- (R);
-        % ループ内のドット描画部分 
         \foreach \k in{0,1,...,\VDNT@dotsNum}{%
           \pgfmathtruncatemacro{\VDNT@halfNum}{\VDNT@dotsNum/2}%
-          \def\do@draw@dot{1}% 描画フラグを立てる
-          % 「現在の行が最初」かつ「kが真ん中」ならフラグを折る
+          \def\do@draw@dot{1}% 
           \ifdim\VDNT@currentYPos=0pt\relax 
             \ifnum\k=\VDNT@halfNum \def\do@draw@dot{0}\fi
           \fi
-          % 「現在の行が最後（次がない）」かつ「kが真ん中」ならフラグを折る
-          % \VDNT@notegoal との比較で行う
           \VDNT@currentXPos=\dimexpr\VDNT@currentYPos+\VDNT@Yinterval\relax
           \ifdim\VDNT@currentXPos<\VDNT@notegoal\else
             \ifnum\k=\VDNT@halfNum \def\do@draw@dot{0}\fi
@@ -253,24 +232,18 @@
             \fill[\VDNT@color] (Dot) circle [radius=\noteDotsRadius@kn];
           \fi
         }
-        % 次の行へ移動
         \advance\VDNT@currentYPos\VDNT@Yinterval\relax
-        %%%カウントダウン
         \advance\kn@linecount@internal by -\@ne\relax 
-        %%%
       }
-      % 外枠描画
       \IfBooleanT{#1}{%
         \draw[\VDNT@color, line width=\noteLineWidth@kn*2.5] (0,0) rectangle (\linewidth, \the\dimexpr\VDNT@currentYPos-\VDNT@Yinterval\relax);
       }%
-      % 下端の三角
-      % 座標を定義：(中心X, 最後の行Y - 4pt)
       \coordinate (BottomMarkerTip) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos-\VDNT@Yinterval-\noteTriangle@mag@kn*4pt);
       \fill[\VDNT@color] (BottomMarkerTip) -- ++(\noteTriangle@mag@kn*3pt,\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt,0) -- cycle;
     \end{tikzpicture}%
   }%
   \egroup%
-  \global\advance\VDNT@uniqe\@ne% 描画番号を進める
+  \global\advance\VDNT@uniqe\@ne%
   \par%
 }
 
@@ -285,16 +258,13 @@
   \noindent%
   \begin{tikzpicture}[xscale=\VDNT@xscaler]
     \VDNT@currentYPos\z@
-    %%%
     \kn@linecount@internal=#1\relax 
-    %%%
     \coordinate (TopMarker) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@Yinterval+\noteTriangle@mag@kn*4pt);
     \fill[\VDNT@color] (TopMarker) -- ++(\noteTriangle@mag@kn*3pt, -\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
     \foreach \i in {1, 2, ..., #1} {%
       \xdef\tempY{\the\dimexpr\VDNT@Yinterval*\i\relax}
       \coordinate (LineL) at (0, \tempY);
       \coordinate (LineR) at (\linewidth, \tempY);
-      % --- 行番号の描画 ---
       \ifVDNT@shownumber
         \pgfmathtruncatemacro{\VDNT@currentnum}{#1 - \i + 1 }
         \pgfmathtruncatemacro{\rem@notefill}{mod(\VDNT@currentnum,\VDNT@step)}
@@ -302,7 +272,6 @@
           \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-\f@size/2pt]LineL) {\VDNT@currentnum};
         \fi
       \fi
-      % --------------------
       \draw[\VDNT@color, line width=\noteLineWidth@kn] (LineL) -- (LineR);
       \foreach \k in {0, 1, ..., \VDNT@dotsNum} {%
         \pgfmathtruncatemacro{\VDNT@halfNum}{\VDNT@dotsNum/2}%
@@ -314,7 +283,6 @@
           \fill[\VDNT@color] (DotPos) circle [radius=\noteDotsRadius@kn];
         \fi
       }%
-      % 最後に使ったY座標を記録
       \ifnum\i=#1 \global\VDNT@currentYPos=\tempY\relax \fi
     }%
     \coordinate (BottomMarker) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@currentYPos-\noteTriangle@mag@kn*4pt);
@@ -333,16 +301,13 @@
   \noindent%
   \begin{tikzpicture}[xscale=\VDNT@xscaler]
     \VDNT@currentYPos\z@
-    %%%
     \kn@linecount@internal=#1\relax 
-    %%%
     \coordinate (TopMarker) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@Yinterval+\noteTriangle@mag@kn*4pt);
     \fill[\VDNT@color] (TopMarker) -- ++(\noteTriangle@mag@kn*3pt, -\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
     \foreach \i in {1, 2, ..., #2} {%
       \xdef\tempY{\the\dimexpr\VDNT@Yinterval*\i\relax}
       \coordinate (LineL) at (0, \tempY);
       \coordinate (LineR) at (\linewidth, \tempY);
-      % --- 行番号の描画 ---
       \ifVDNT@shownumber
         \pgfmathtruncatemacro{\VDNT@currentnum}{#2 - \i + 1 }
         \pgfmathtruncatemacro{\rem@notefill}{mod(\VDNT@currentnum,\VDNT@step)}
@@ -350,7 +315,6 @@
           \node[anchor=east, font=\scriptsize, text=\VDNT@color, overlay] at ([xshift=-\f@size/2pt]LineL) {\VDNT@currentnum};
         \fi
       \fi
-      % --------------------
       \draw[\VDNT@color, line width=\noteLineWidth@kn] (LineL) -- (LineR);
       \foreach \k in {0, 1, ..., \VDNT@dotsNum} {%
         \pgfmathtruncatemacro{\VDNT@halfNum}{\VDNT@dotsNum/2}%
@@ -367,7 +331,6 @@
           \fill[\VDNT@color] (DotPos) circle [radius=\noteDotsRadius@kn];
         \fi
       }%
-      % 最後に使ったY座標を記録しておく（下の三角用）
       \ifnum\i=#2 \global\VDNT@currentYPos=\tempY\relax \fi
     }%
     \IfBooleanT{#1}{%
@@ -379,5 +342,6 @@
   \egroup%
   \par%
 }
+%%%
 
 \endinput
