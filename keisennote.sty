@@ -258,7 +258,6 @@
   \noindent%
   \begin{tikzpicture}[xscale=\VDNT@xscaler]
     \VDNT@currentYPos\z@
-    \kn@linecount@internal=#1\relax 
     \coordinate (TopMarker) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@Yinterval+\noteTriangle@mag@kn*4pt);
     \fill[\VDNT@color] (TopMarker) -- ++(\noteTriangle@mag@kn*3pt, -\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
     \foreach \i in {1, 2, ..., #1} {%
@@ -301,7 +300,6 @@
   \noindent%
   \begin{tikzpicture}[xscale=\VDNT@xscaler]
     \VDNT@currentYPos\z@
-    \kn@linecount@internal=#1\relax 
     \coordinate (TopMarker) at (\VDNT@Xinterval*\VDNT@dotsNum/2, \VDNT@Yinterval+\noteTriangle@mag@kn*4pt);
     \fill[\VDNT@color] (TopMarker) -- ++(\noteTriangle@mag@kn*3pt, -\noteTriangle@mag@kn*4pt) -- ++(-\noteTriangle@mag@kn*6pt, 0) -- cycle;
     \foreach \i in {1, 2, ..., #2} {%
